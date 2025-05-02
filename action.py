@@ -19,9 +19,9 @@ class NavigateToPoseActionClient(Node):
         goal_msg = NavigateToPose.Goal()
 
         goal_msg.pose = PoseStamped()
-        goal_msg.pose.header.frame_id = "map"
+        goal_msg.pose.header.frame_id = "map" #-> move wrt to this frame
         goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
-        goal_msg.pose.position.x = x
+        goal_msg.pose.position.x = x #In meters !
         goal_msg.pose.position.y = y
         goal_msg.pose.orientation.w = 1.0
         goal_msg.behavior_tree =""
