@@ -21,9 +21,9 @@ class NavigateToPoseActionClient(Node):
         goal_msg = NavigateToPose.Goal()
 
         goal_msg.pose = PoseStamped()
-        goal_msg.pose.position.x = x #In meters !
-        goal_msg.pose.position.y = y
-        goal_msg.pose.orientation.w = 1.0
+        goal_msg.pose.pose.position.x = x #In meters !
+        goal_msg.pose.pose.position.y = y
+        goal_msg.pose.pose.orientation.w = 1.0
         goal_msg.behavior_tree =""
 
         self.get_logger().info('Sending goal request..')
