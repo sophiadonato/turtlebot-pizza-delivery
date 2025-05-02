@@ -1,3 +1,5 @@
+# For this to work launch cartographer and navigation
+
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
