@@ -22,7 +22,7 @@ Donc il faut créer un node qui lit ce topic et crée notre propre carte
 ##  How to start the robot?
 - Get IP : https://tplinkeap.net 
 Username : admin, mdp : chiefbot
-- ssh ubuntu@{IP} mdp: info0948-2
+- ssh ubuntu@{IP} mdp: turtlebot
 - bring up the robot: ```ros2 launch turtlebot3_bringup robot.launch.py```
 - launch cartographer: ```ros2 launch turtlebot3_cartographer cartographer.launch.py```
 - launch navigation2 : ```ros2 launch turtlebot3_navigation2 navigation2.launch.py map:=$HOME/map.yaml```

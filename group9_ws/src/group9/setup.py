@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
         	'action = group9.action:main',
         	'map_subscriber = group9.map_subscriber:main',
+            'aruco_subscriber = group9.aruco_subscription:main',
         ],
     },
 )
