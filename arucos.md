@@ -35,3 +35,6 @@ geometry_msgs/Pose[] poses
 * Le nombre de arucos est fixe, il est nécessaire de garder en mémoire la position de ces arucos de façon statique, ces positions sont lisibles dans `\aruco_poses` et sont dans la frame `camera_frame` (TBC)  
 * Remettre dans les positions dans la frame `map`(?)
 * Incorporer cette information dans le grid_mapping
+
+## TODO asap
+* To which topic do I have to subcribe to get the absolute frame?  
