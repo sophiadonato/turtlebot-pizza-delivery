@@ -27,7 +27,7 @@ class ArucoSubscriber(Node):
 		self.get_logger().info('Aruco information')
 		if len(arucoMarkers.marker_ids) > 0 :
 			id = arucoMarkers.marker_ids[0]
-			pose = arucoMarkers.pose[0] #Pose in camera_frame
+			pose = arucoMarkers.poses[0] #Pose in camera_frame
 			# How to convert in absolute frame?
 			try:
 				t = self.tf_buffer.lookup_transform('base_footprint','camera_link',rclpy.time.Time())

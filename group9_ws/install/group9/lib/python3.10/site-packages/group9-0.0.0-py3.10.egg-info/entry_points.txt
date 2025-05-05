@@ -1,4 +1,5 @@
 [console_scripts]
 action = group9.action:main
+aruco_subscriber = group9.aruco_subscription:main
 map_subscriber = group9.map_subscriber:main
 

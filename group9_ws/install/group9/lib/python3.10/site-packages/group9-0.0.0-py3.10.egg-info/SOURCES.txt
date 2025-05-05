@@ -10,6 +10,7 @@ setup.py
 ../../build/group9/group9.egg-info/zip-safe
 group9/__init__.py
 group9/action.py
+group9/aruco_subscription.py
 group9/grid_mapping.py
 group9/map_subscriber.py
 resource/group9

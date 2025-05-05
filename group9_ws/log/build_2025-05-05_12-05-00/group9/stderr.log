@@ -1,0 +1,5 @@
+  File "/home/laptop03/G9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/aruco_subscription.py", line 38
+    		if not np.isnan(self.ArucoLoca			self.get_logger().info(pose)	tions).any():
+    		                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax. Perhaps you forgot a comma?
+

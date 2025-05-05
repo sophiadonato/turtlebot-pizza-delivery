@@ -37,4 +37,15 @@ geometry_msgs/Pose[] poses
 * Incorporer cette information dans le grid_mapping
 
 ## TODO asap
-* To which topic do I have to subcribe to get the absolute frame?  
+* To which topic do I have to subcribe to get the absolute frame? 
+
+## To debug
+```self.ArucoLocations[id] = do_transform_pose(pose,t)```  
+TypeError: float() argument must be a string or a real number, not 'Pose'
+
+But : 
+```def  tf2_geometry_msgs::tf2_geometry_msgs::do_transform_pose 	( 	  	pose,
+		  	transform	 
+	)```
+
+What is the difference between Pose and pose ? And how can I convert a Pose into a pose?
