@@ -21,21 +21,23 @@ class ArucoSubscriber(Node):
 		self.subscription
 		self.tf_buffer = Buffer()
 		self.listener = TransformListener(self.tf_buffer, self)
-		self.ArucoLocations = np.full(10, np.nan) #How many arucos do we have to consider?
+		self.ArucoLocations = [None]*10 #How many arucos do we have to consider?
 		
 	def aruco_callback(self, arucoMarkers):
-		self.get_logger().info('Aruco information')
 		if len(arucoMarkers.marker_ids) > 0 :
 			id = arucoMarkers.marker_ids[0]
+			self.get_logger().info(f'Aruco information : ID : {id}')
 			pose = arucoMarkers.poses[0] #Pose in camera_frame
 			# How to convert in absolute frame?
 			try:
-				t = self.tf_buffer.lookup_transform('base_footprint','camera_link',rclpy.time.Time())
+				t = self.tf_buffer.lookup_transform('map','camera_optical_joint',rclpy.time.Time())
 			except TransformException as ex:
-				self.get_logger().info(f'Could not transform base_footprint to camera_link: {ex}')
+				self.get_logger().info(f'Could not transform map to camera_optical_joint: {ex}')
 				return
 			self.ArucoLocations[id] = do_transform_pose(pose,t)
-		if not np.isnan(self.ArucoLocations).any():
+			self.get_logger().info(f'{self.ArucoLocations[id].position.x}')
+
+		if all(pose is not None for pose in self.ArucoLocations):
 			self.get_logger().info('All arucos have been visited')
 	
 def main(args=None):

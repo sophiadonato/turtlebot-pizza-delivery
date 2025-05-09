@@ -1,0 +1,5 @@
+  File "/home/laptop02/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/aruco_subscription.py", line 35
+    				self.get_logger().info(f'Could not transform map to camera_optical_joint': {ex}')
+    				                                                                               ^
+SyntaxError: unterminated string literal (detected at line 35)
+
