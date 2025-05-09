@@ -37,3 +37,8 @@ Username : admin, mdp : chiefbot
 - Run a node in root of directory :  ```ros2 run <package_name> <node_name>``` 
 
 
+## Useful commands
+- reboot instead of shuting down : sudo reboot
+- see percentage of battery : ros2 topic echo /battery_state
+
+

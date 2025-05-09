@@ -1,0 +1,5 @@
+  File "/home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/map_subscriber.py", line 167
+    				'map'
+    				^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax. Perhaps you forgot a comma?
+
