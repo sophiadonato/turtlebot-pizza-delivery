@@ -37,4 +37,4 @@ geometry_msgs/Pose[] poses
 * Incorporer cette information dans le grid_mapping
 
 ## TODO asap
-* To which topic do I have to subcribe to get the absolute frame? => In which topic to I have to do the transform?
+* Send array of frames through a topic to be listened by the mapping
