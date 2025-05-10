@@ -63,7 +63,7 @@ def updateMapping(PoseArray):
     #Loop over all (i,j) of the map => How ?
     i = 0
     j = 0
-    if(isSeenByCamera(i,j,robot, URcorner, ULcorner))
+    if(isSeenByCamera(i,j,robot, URcorner, ULcorner)):
         #We have to check that it's a wall
         if(map[i,j] == wall): #How?
             map[i,j] == Observed
@@ -74,11 +74,11 @@ def isSeenByCamera(i,j, robot, URcorner, ULcorner):
         return False
     if(ManhattanDistance(i,j, URcorner) > 45):
         return False
-    if(ManhattanDistance(i,j, URcorner) > 45):
+    if(ManhattanDistance(i,j, ULcorner) > 45):
        return False
    
     return True
 
-def ManhattanDistance(i1,j1, i2,j2):
+def ManhattanDistance(i1,j1, i2,j2): #TBC see prove of Concept
     return abs(i1-i2) + abs(j1-j2)
         

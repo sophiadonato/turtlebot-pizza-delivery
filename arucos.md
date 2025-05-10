@@ -53,3 +53,5 @@ Il est nécessaire d'avoir une fonction de mapping qui renvoie (i,j) pour une pa
 Ce raisonnement devrait être fait dans les fonctions de mapping
 
 Comment être sur que les murs vu de cotés ne sont pas comptés?
+
+Manhattan distance => Does not work, consider euclidian?
