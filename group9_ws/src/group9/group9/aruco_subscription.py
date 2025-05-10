@@ -21,7 +21,7 @@ class ArucoSubscriber(Node):
 		self.tf_buffer = Buffer()
 		self.listener = TransformListener(self.tf_buffer, self)
 		nbArucos = 10
-		self.publisher = self.create_publisher(Pose[nbArucos], 'arucos_poses', 10)
+		self.publisher = self.create_publisher(Pose[nbArucos], 'arucos_poses', 10) #Pose_Array does exist, it should be tried
 		self.ArucoLocations = [None]*nbArucos  #How many arucos do we have to consider?
 		
 	def aruco_callback(self, arucoMarkers):
@@ -44,6 +44,7 @@ class ArucoSubscriber(Node):
 
 	def aruco_locations_publisher(self):
 		#Do we need to publish other informations?
+		#See aruco_node to see how it's done (Using ArrayPose())
 		self.publisher_.publish(self.ArucoLocations)
      
 

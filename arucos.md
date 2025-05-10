@@ -38,3 +38,18 @@ geometry_msgs/Pose[] poses
 
 ## TODO asap
 * Send array of frames through a topic to be listened by the mapping
+
+## Exploration of the whole map for aruco detection
+Il est nécessaire de retenir les murs qui ont été vus par la caméra afin de savoir où chercher des arucos markers  
+Comment faire ?
+* Considérer que la caméra a une certaine portée en distance
+* L'orientation de l'avant du robot (=orientation de la caméra) est connue
+* Interaction avec la map (Il est necessaire de considérer les murs qui coupent le champ de vision)
+
+Première approximation: considérer que la zone de vision est un rectangle, spécification de la position du robot et de son orientation ainsi que de la profondeur de vision.  
+Considération de la map faite avec le lidar pour remarquer les intersections entre le champ de vision et les murs de la map (Est ce vraiment nécessaire?)  
+
+Il est nécessaire d'avoir une fonction de mapping qui renvoie (i,j) pour une paire (x,y) donnée  
+Ce raisonnement devrait être fait dans les fonctions de mapping
+
+Comment être sur que les murs vu de cotés ne sont pas comptés?
