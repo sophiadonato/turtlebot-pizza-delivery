@@ -24,8 +24,8 @@ class wallsObservation(Node):
 
         # This transform represents a shift from (0, 0) to (15, 30)
         # Get better values using robot should be done
-        t1.translation.x = 15
-        t1.translation.y = 30.0
+        t1.translation.x = 0.15
+        t1.translation.y = 0.30
         t1.translation.z = 0.0
 
         # No rotation
@@ -38,8 +38,8 @@ class wallsObservation(Node):
 
         # This transform represents a shift from (0, 0) to (-15, 30)
         # Get better values using robot should be done
-        t2.translation.x = -15
-        t2.translation.y = 30.0
+        t2.translation.x = -0.15
+        t2.translation.y = 0.30
         t2.translation.z = 0.0
 
         # No rotation
@@ -70,7 +70,7 @@ def updateMapping(PoseArray):
 
 def isSeenByCamera(i,j, robot, URcorner, ULcorner):
     # Return false if (i,j) is not in the camera field of vision, true if yes
-    if(ManhattanDistance(i,j, robot) > 45): #Fine tune the values
+    if(ManhattanDistance(i,j, robot) > 45): #Which value to consider => value in map discretization (not in cm !)
         return False
     if(ManhattanDistance(i,j, URcorner) > 45):
         return False
