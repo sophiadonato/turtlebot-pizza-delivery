@@ -7,7 +7,6 @@ from tf2_geometry_msgs import do_transform_pose
 from mapping import convert_Pose_to_ij #TO DO
 
 class wallsObservation(Node):
-
     def __init__(self):
         super().__init__('walls_observation')
         self.subscription = self.create_subscription(
@@ -34,7 +33,7 @@ class wallsObservation(Node):
         t1.rotation.z = 0.0
         t1.rotation.w = 1.0
         
-        t2 = Transform() #UpperLeftCornerTransform
+        t2 = Transform() #UpperRightCornerTransform
 
         # This transform represents a shift from (0, 0) to (-15, 30)
         # Get better values using robot should be done
@@ -52,6 +51,7 @@ class wallsObservation(Node):
         msg.append(robotPose)
         msg.append(do_transform_pose(robotPose, t1))
         msg.append(do_transform_pose(robotPose, t2))
+        self.publisher_.publish(msg)
 
 
 def updateMapping(PoseArray):
@@ -70,15 +70,15 @@ def updateMapping(PoseArray):
 
 def isSeenByCamera(i,j, robot, URcorner, ULcorner):
     # Return false if (i,j) is not in the camera field of vision, true if yes
-    if(ManhattanDistance(i,j, robot) > 45): #Which value to consider => value in map discretization (not in cm !)
+    distance = 10**2 + 5**2
+    if(EuclideanDistance(i,j, robot[0], robot[1]) > distance): #Which value to consider => value in map discretization (not in cm !)
         return False
-    if(ManhattanDistance(i,j, URcorner) > 45):
+    if(EuclideanDistance(i,j, URcorner[0],URcorner[1]) > distance):
         return False
-    if(ManhattanDistance(i,j, ULcorner) > 45):
+    if(EuclideanDistance(i,j, ULcorner[0], ULcorner[1]) > distance):
        return False
-   
     return True
 
-def ManhattanDistance(i1,j1, i2,j2): #TBC see prove of Concept
-    return abs(i1-i2) + abs(j1-j2)
+def EuclideanDistance(i1,j1, i2,j2): #TBC see prove of Concept
+    return (i1-i2)**2 + (j1-j2)**2
         
