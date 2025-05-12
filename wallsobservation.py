@@ -31,7 +31,7 @@ class wallsObservation(Node):
         t1.rotation.x = 0.0
         t1.rotation.y = 0.0
         t1.rotation.z = 0.0
-        t1.rotation.w = 1.0
+        t1.rotation.w = 1.0 #What is w?
         
         t2 = Transform() #UpperRightCornerTransform
 

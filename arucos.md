@@ -54,4 +54,12 @@ Ce raisonnement devrait être fait dans les fonctions de mapping
 
 Comment être sur que les murs vu de cotés ne sont pas comptés?
 
-Manhattan distance => Does not work, consider euclidian?
+Manhattan distance => Does not work, consider euclidian? See prove of concept
+
+## Pizza delivery
+Second part of the demonstration, is to have the robot to navigate to a given list of arucos.  
+When receiving this list, we must be able to compute the location in which the robot should arrive (30 cm IN FRONT of the aruco)  
+How to know to which location the robot must be with the right orientation? 
+How to get the right order to visit the arucos?  
+How to be sure to be on the right side of the aruco ? Having the orientation should be nice, since we could compute the transform.  
+What is the actual orientation measured?
