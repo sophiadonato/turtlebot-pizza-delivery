@@ -33,6 +33,35 @@ def index_to_real_world(i, j, res, p, q):
     
     return x , y
 
+def world_to_index(x, y, res, p, q):
+    """ Fonction that transform the index of the Occupancy Grid to a real world position
+        where the real world origin is determined when the robot is launched
+        
+        argument:
+            - x: x-coordinate in the real world
+            - y: y-coordinate in the real world
+            - res: resolution of the Occupancy Grid
+            - p: vector of 3 dimensions = coordinate of the origin of the Occupancy Grid
+            - q: vector of 4 dimensions = quaternion of the Occupancy Grid with respect to the real world
+            
+        return: 
+            i, j: index of the point (x,y) in the Occupancy grid
+
+        /!\: in Occupancy Grid, the cell [0,0] is the low left corner.
+    """
+    theta = angle_to_quaternion(q[0], q[1], q[2], q[3])
+
+    dx = x - p[0]
+    dy = y - p[1]
+
+    x_loc = dx * np.cos(theta) + dy * np.sin(theta)
+    y_loc = dy * np.cos(theta) - dx * np.sin(theta)
+
+    j = int(x_loc / res - 0.5)
+    i = int(y_loc / res - 0.5)
+
+    return i , j
+
 def load_grid(grid, world_matrix):
     world_shape = [1000, 1000]
     world_res = 0.005

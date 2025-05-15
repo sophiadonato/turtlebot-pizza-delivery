@@ -33,7 +33,36 @@ def index_to_real_world(i, j, res, p, q):
     
     return x , y
 
-def load_grid(grid, data):
+def world_to_index(x, y, res, p, q):
+    """ Fonction that transform the index of the Occupancy Grid to a real world position
+        where the real world origin is determined when the robot is launched
+        
+        argument:
+            - x: x-coordinate in the real world
+            - y: y-coordinate in the real world
+            - res: resolution of the Occupancy Grid
+            - p: vector of 3 dimensions = coordinate of the origin of the Occupancy Grid
+            - q: vector of 4 dimensions = quaternion of the Occupancy Grid with respect to the real world
+            
+        return: 
+            i, j: index of the point (x,y) in the Occupancy grid
+
+        /!\: in Occupancy Grid, the cell [0,0] is the low left corner.
+    """
+    theta = angle_to_quaternion(q[0], q[1], q[2], q[3])
+
+    dx = x - p[0]
+    dy = y - p[1]
+
+    x_loc = dx * np.cos(theta) + dy * np.sin(theta)
+    y_loc = dy * np.cos(theta) - dx * np.sin(theta)
+
+    j = int(x_loc / res - 0.5)
+    i = int(y_loc / res - 0.5)
+
+    return i , j
+
+def load_grid(grid, world_matrix):
     world_shape = [1000, 1000]
     world_res = 0.005
     world_center = [500, 500]
@@ -53,26 +82,26 @@ def load_grid(grid, data):
             i_world = int(world_center[1] + x / world_res)  # column
 
             if 0<= i_world < world_shape[1] and 0<=  j_world < world_shape[0]:
-                data[i_world, j_world] = data[i,j]
+                world_matrix[i_world, j_world] = data[i,j]
 
     
-    data[data > 0.7] = 1.0
-    data[(data < 0.3) & (data > 0)] = 0.0
-    unknown = (data >= 0.3) & (data <= 0.7)
-    data[unknown] = -1
-    unknown_mask = (data == -1)
-    data[unknown_mask] = 0.0
+    world_matrix[world_matrix > 0.7] = 1.0
+    world_matrix[(world_matrix < 0.3) & (world_matrix > 0)] = 0.0
+    unknown = (world_matrix >= 0.3) & (world_matrix <= 0.7)
+    world_matrix[unknown] = -1
+    unknown_mask = (world_matrix == -1)
+    world_matrix[unknown_mask] = 0.0
     for i in range(height):
         for j in range(width):
             if i<height-1 and j<width-1:
-                if data[i,j] == 1:
-                        if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
-                            data[i,j] = 0
+                if world_matrix[i,j] == 1:
+                        if world_matrix[i-1,j] == 0 and world_matrix[i+1,j] == 0 and world_matrix[i,j-1] == 0 and world_matrix[i,j+1] == 0:
+                            world_matrix[i,j] = 0
                 else: 
-                    if data[i-1,j] == 1 and data[i+1,j] == 1 and data[i,j-1] == 1 and data[i,j+1] == 1:
-                        data[i,j] = 1                  
-    unknown_mask = unknown_mask & (data == 0)
-    final_matrix = binary_dilation(data, iterations=1)
+                    if world_matrix[i-1,j] == 1 and world_matrix[i+1,j] == 1 and world_matrix[i,j-1] == 1 and world_matrix[i,j+1] == 1:
+                        world_matrix[i,j] = 1                  
+    unknown_mask = unknown_mask & (world_matrix == 0)
+    final_matrix = binary_dilation(world_matrix, iterations=1)
     final_matrix = final_matrix.astype(int)
     final_matrix[unknown_mask] = -1
     

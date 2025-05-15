@@ -9,7 +9,7 @@ from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
 from rclpy.action import ActionClient
 from nav2_msgs.action import NavigateToPose
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, PoseArray
 from action_msgs.msg import GoalStatus
 from tf2_ros.buffer import Buffer
 from tf2_ros import TransformException
@@ -28,38 +28,56 @@ class MapSubscriber(Node):
 		self.subscription
 		self.grid_matrix = np.zeros((2000, 2000))
 		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+		self.subscriptionAruco = self.create_subscription(PoseArray, 'arucos_location', self.arruco_callback, 10)
+		self.subscriptionArucoRobot = self.create_subscription(PoseArray, 'robot_location', self.arrucoRobot_callback, 10)
 		self.sent_goal = False
 		self.explored_map = False
 		self.tf_buffer = Buffer()
 		self.tf_listener = TransformListener(self.tf_buffer, self)
 		self.x_robot = 0
 		self.y_robot = 0
-
+		self.resolution = 0
+		self.p = [0,0]
+		self.q = [0,0]
+		self.listArrucoVisit = []
+		self.listArrucoRobot = []
 		
 	def listener_callback(self, grid):
 		# self.get_logger().info('Occupancy grid management')
 		
 		self.grid_matrix = self.load_grid(grid)
-
-		# np.savetxt("matrix.txt", self.grid_matrix)
+		self.resolution = grid.info.resolution
+		self.p = grid.info.origin.position
+		self.q = grid.info.origin.orientation
+		for elem in self.listArrucoRobot:
+			self.grid_matrix[elem[0]][elem[1]] = 1.5
+		for elem in self.listArrucoVisit:
+			self.grid_matrix[elem[0]][elem[1]] = 2
+		np.savetxt("matrix.txt", self.grid_matrix)
 		
-		# plt.imshow(self.grid_matrix, cmap="viridis")
-		# plt.colorbar()
-		# plt.savefig("src/group9/heatmapNODILATATION.pdf", dpi=300, bbox_inches='tight')
-		# plt.close()
-
-		if(self.sent_goal == False and self.explored_map == False):
-			self.sent_goal = True
-			self.get_logger().info('Sending goal to the robot')
-
-			# Finding goal 
-			go_to_goal , x_goal, y_goal = self.find_next_goal(self.grid_matrix, grid)
-
-			if go_to_goal :
-				self.get_logger().info(f" x goal : {x_goal}, y goal : {y_goal}")
-				self.send_goal(x_goal, y_goal)
+		plt.imshow(self.grid_matrix, cmap="viridis")
+		plt.colorbar()
+		plt.savefig("src/group9/heatmapTestAruco.pdf", dpi=300, bbox_inches='tight')
+		plt.close()
 			
+	def arruco_callback(self, msg):
+		listOfPoses = msg.poses
+		value = 0
+		for pose in listOfPoses:
+			i,j = self.world_to_index(pose.position.x, pose.position.y,self.resolution,self.p, self.q)
+			self.get_logger().info(f" ARUCO {value} :i : {i}, j: {j}")
+			value += 1
+			self.listArrucoVisit.append((i,j))
 
+
+	def arrucoRobot_callback(self, msg):
+		listOfPoses = msg.poses
+		value = 0
+		for pose in listOfPoses:
+			i,j = self.world_to_index(pose.position.x, pose.position.y,self.resolution,self.p, self.q)
+			self.get_logger().info(f" ROBOT {value}: i : {i}, j: {j}")
+			value += 1
+			self.listArrucoRobot.append((i,j))
 		
 	def angle_to_quaternion(self, qx, qy, qz, qw):
 		return math.atan2(2*(qw * qz + qx * qy), 1-2*(qy**2 + qz**2))
@@ -78,7 +96,7 @@ class MapSubscriber(Node):
 			return: 
 				x, y: the coordinate of the cellule(j,i) in the real world
 		"""
-		theta = self.angle_to_quaternion(q[0], q[1], q[2], q[3])
+		theta = self.angle_to_quaternion(q.x, q.y, q.z, q.w)
 		
 		x_loc = (i + 0.5) * res
 		y_loc = (j + 0.5) * res
@@ -90,6 +108,35 @@ class MapSubscriber(Node):
 		y = p[1] + dy
 		
 		return x , y
+	
+	def world_to_index(self,x, y, res, p, q):
+		""" Fonction that transform the index of the Occupancy Grid to a real world position
+			where the real world origin is determined when the robot is launched
+			
+			argument:
+				- x: x-coordinate in the real world
+				- y: y-coordinate in the real world
+				- res: resolution of the Occupancy Grid
+				- p: vector of 3 dimensions = coordinate of the origin of the Occupancy Grid
+				- q: vector of 4 dimensions = quaternion of the Occupancy Grid with respect to the real world
+				
+			return: 
+				i, j: index of the point (x,y) in the Occupancy grid
+
+			/!\: in Occupancy Grid, the cell [0,0] is the low left corner.
+		"""
+		theta = self.angle_to_quaternion(q.x, q.y, q.z, q.w)
+
+		dx = x - p.x
+		dy = y - p.y
+
+		x_loc = dx * np.cos(theta) + dy * np.sin(theta)
+		y_loc = dy * np.cos(theta) - dx * np.sin(theta)
+
+		j = int(x_loc / res - 0.5)
+		i = int(y_loc / res - 0.5)
+
+		return i , j
 
 	def load_grid(self, grid):
 		width = grid.info.width
@@ -123,34 +170,6 @@ class MapSubscriber(Node):
 		
 		return final_grid
 	
-	def send_goal(self, x, y):
-		self.get_logger().info('Waiting for action server..')
-		self._action_client.wait_for_server()
-		goal_msg = NavigateToPose.Goal()
-
-		goal_msg.pose = PoseStamped()
-		goal_msg.pose.header.frame_id = "map" #-> move wrt to this frame
-		goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
-		goal_msg.pose.pose.position.x = x #In meters !
-		goal_msg.pose.pose.position.y = y
-		goal_msg.pose.pose.orientation.w = 1.0
-		goal_msg.behavior_tree =""
-
-		self.get_logger().info('Sending goal request..')
-
-		self._send_goal_future = self._action_client.send_goal_async(goal_msg)
-
-		self._send_goal_future.add_done_callback(self.goal_response_callback)
-
-	def goal_response_callback(self, future):
-		goal_handle = future.result()
-		if not goal_handle.accepted:
-			self.get_logger().info('Goal rejected')
-			return
-
-		self.get_logger().info('Goal accepted')
-		self._get_result_future = goal_handle.get_result_async()
-		self._get_result_future.add_done_callback(self.get_result_callback)
 
 	def get_result_callback(self, future):
 		result = future.result().result
@@ -251,12 +270,12 @@ class MapSubscriber(Node):
 
 		# Getting true coordinates of each middle
 		origin = grid.info.origin
-		p = np.array([origin.position.x, origin.position.y, origin.position.z])
-		q = np.array([origin.orientation.x, origin.orientation.y, origin.orientation.z, origin.orientation.w])
+		self.p = np.array([origin.position.x, origin.position.y, origin.position.z])
+		self.q = np.array([origin.orientation.x, origin.orientation.y, origin.orientation.z, origin.orientation.w])
 
 		frontier_middles_coord = []
 		for i, j in frontier_middles :
-			x, y = self.index_to_real_world(j,i, grid.info.resolution, p, q)
+			x, y = self.index_to_real_world(j,i, grid.info.resolution, self.p, self.q)
 			frontier_middles_coord.append((x,y))
 		
 
