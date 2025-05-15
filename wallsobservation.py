@@ -2,7 +2,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from tf2_ros.buffer import Buffer
-from geometry_msgs.msg import Pose, Transform, PoseArray
+from geometry_msgs.msg import Pose, TransformStamped, PoseArray
 from tf2_geometry_msgs import do_transform_pose
 from mapping import convert_Pose_to_ij #TO DO
 
@@ -19,7 +19,7 @@ class wallsObservation(Node):
     
     def walls_callback(self, robotPose):
         # It will compute the pose of the robot, the pose of the upper left and upper right corner of a rectangle
-        t1 = Transform() #UpperLeftCornerTransform
+        t1 = TransformStamped() #UpperLeftCornerTransform
 
         # This transform represents a shift from (0, 0) to (15, 30)
         # Get better values using robot should be done
@@ -33,7 +33,7 @@ class wallsObservation(Node):
         t1.rotation.z = 0.0
         t1.rotation.w = 1.0 #What is w?
         
-        t2 = Transform() #UpperRightCornerTransform
+        t2 = TransformStamped() #UpperRightCornerTransform
 
         # This transform represents a shift from (0, 0) to (-15, 30)
         # Get better values using robot should be done
