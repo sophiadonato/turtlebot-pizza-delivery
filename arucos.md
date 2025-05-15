@@ -63,3 +63,11 @@ How to know to which location the robot must be with the right orientation?
 How to get the right order to visit the arucos?  
 How to be sure to be on the right side of the aruco ? Having the orientation should be nice, since we could compute the transform.  
 What is the actual orientation measured?
+
+## Kalman filter
+To integrate all the data, we need a Kalman filter to incorporate new sensor reading  
+I think the Kalman filter should be done on the transform, to get the most accurate position to visit the arucos and not on the aruco itself due to noLinearity of quaternion 
+
+TBD soon : 
+* Find good transform for given aruco position to visit
+* Test Kalmann filter

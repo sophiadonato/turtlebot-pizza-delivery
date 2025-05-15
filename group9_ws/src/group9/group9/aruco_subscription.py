@@ -7,6 +7,7 @@ from tf2_ros.buffer import Buffer
 from geometry_msgs.msg import Pose, PoseArray,TransformStamped
 from tf2_geometry_msgs import do_transform_pose
 from tf2_ros import TransformException
+import KalmanFilter
 
 class ArucoSubscriber(Node):
 
@@ -24,6 +25,9 @@ class ArucoSubscriber(Node):
 		self.publisher1 = self.create_publisher(PoseArray, 'arucos_location', 10)
 		self.publisher2 = self.create_publisher(PoseArray, 'robot_location', 10)
 		self.ArucoLocations = [None]*nbArucos  #How many arucos do we have to consider?
+
+		#We implement a Kalman filter to get rid of camera noise
+		self.filters = {}
 		
 	def aruco_callback(self, arucoMarkers):
 		if len(arucoMarkers.marker_ids) > 0 :
@@ -35,7 +39,12 @@ class ArucoSubscriber(Node):
 			except TransformException as ex:
 				self.get_logger().info(f'Could not transform map to camera_optical_joint: {ex}')
 				return
-			self.ArucoLocations[id] = do_transform_pose(pose,t)
+			pose = do_transform_pose(pose,t)
+			if id not in self.filters:
+				self.filters[id] = KalmanFilter()
+				
+			self.filters[id].update(pose)
+			self.ArucoLocations[id] = self.filters[id].get_estimate()
    
 		if all(pose is not None for pose in self.ArucoLocations):
 			self.get_logger().info('All arucos have been visited')
@@ -56,7 +65,7 @@ class ArucoSubscriber(Node):
 		self.publisher1.publish(locationArucos)
 		self.publisher2.publish(robotToVisit)
 
-def PoseToVisitForGivenAruco(ArucoPose):
+def PoseToVisitForGivenAruco(ArucoPose): #To be improved
 		#What is the orientation in the ArucoPose ?
 		t1 = TransformStamped() #UpperLeftCornerTransform
 
@@ -73,6 +82,8 @@ def PoseToVisitForGivenAruco(ArucoPose):
 		t1.transform.rotation.w = 1.0 #What is w?
 		
 		return do_transform_pose(ArucoPose, t1)
+
+
 
 	
 def main(args=None):
