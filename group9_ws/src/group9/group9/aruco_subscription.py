@@ -21,7 +21,7 @@ class ArucoSubscriber(Node):
 		self.tf_buffer = Buffer()
 		self.listener = TransformListener(self.tf_buffer, self)
 		nbArucos = 2
-		self.publisher1 = self.create_publisher(PoseArray, 'arucos_location', 10) #Pose_Array does exist, it should be tried
+		self.publisher1 = self.create_publisher(PoseArray, 'arucos_location', 10)
 		self.publisher2 = self.create_publisher(PoseArray, 'robot_location', 10)
 		self.ArucoLocations = [None]*nbArucos  #How many arucos do we have to consider?
 		
