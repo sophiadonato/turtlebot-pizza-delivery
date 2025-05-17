@@ -19,6 +19,7 @@ class PathOfDelivering(Node):
             'delivery_locations',
             self.getIDs,
             10)
+        self.startingRobotLocation #How to know the robot location at which the path must start?
         self.subscription
         self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
         self.fullPose= [None]
@@ -36,7 +37,10 @@ class PathOfDelivering(Node):
                 if i in id:
                     self.poseToVisit.append(self.fullPose[i])
             self.destroy_subscription(self.subcriptionIds)
-            self.publisher.publish(planning(self.poseToVisit))  
+            self.computation(self)
+    
+    def computation(self):
+        distances = planning(self.startingRobotLocation, self.poseToVisit) 
             
 def main(args=None):
 	rclpy.init(args=args)

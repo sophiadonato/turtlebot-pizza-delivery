@@ -7,7 +7,7 @@ The Poses to visit are accessible with listening to a topic from Aruco_subcriber
 This topic sends the locations of all the place to go in other to visit the arucos
 
 ## Planning of the visit
-The starting position will be the actual turtlebot Pose.  
+The starting position will be the actual turtlebot Pose.How can we get it? To which topic do we have to listen to?   
 We have a small number of aruco to visit (less than 10). We therefore have a small TSP (Travel Salesman Problem). 
 We need to know the length of the path between all these arucos.
 
