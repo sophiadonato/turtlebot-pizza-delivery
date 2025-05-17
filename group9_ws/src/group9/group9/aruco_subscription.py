@@ -43,7 +43,7 @@ class ArucoSubscriber(Node):
 			if id not in self.filters:
 				self.filters[id] = KalmanFilter()
 				
-			self.filters[id].update(pose)
+			self.filters[id].update(pose) #KF on the global aruco location
 			self.ArucoLocations[id] = self.filters[id].get_estimate()
    
 		if all(pose is not None for pose in self.ArucoLocations):
@@ -67,21 +67,35 @@ class ArucoSubscriber(Node):
 
 def PoseToVisitForGivenAruco(ArucoPose): #To be improved
 		#What is the orientation in the ArucoPose ?
-		t1 = TransformStamped() #UpperLeftCornerTransform
-
-		# This transform represents a shift from (0, 0) to (0, 30)
-		t1.transform.translation.x = 0.0
-		t1.transform.translation.y = 0.30
+		#Values have been found using simulations on Gazebo
+		t1 = TransformStamped()
+  
+		t1.transform.translation.x = 0.5
+		t1.transform.translation.y = 0.0
 		t1.transform.translation.z = 0.0
 
-		# Rotation of the Pose should be confirmed using TurtleBot
 		# We want to get a vector that face the wall
+		# We have rotation of the axis of 180 degrees around z axis
+		# And rotation around y of -90 degrees
 		t1.transform.rotation.x = 0.0
 		t1.transform.rotation.y = 0.0
-		t1.transform.rotation.z = 3.1415 
-		t1.transform.rotation.w = 1.0 #What is w?
+		t1.transform.rotation.z = 1.0
+		t1.transform.rotation.w = 0.0 
+  
+		t2 = TransformStamped()
+
+		t2.transform.translation.x = 0.0
+		t2.transform.translation.y = 0.0
+		t1.transform.translation.z = 0.0
+
+		# We want to get a vector that face the wall
+		# And rotation around y of -90 degrees ? How come? TBC
+		t1.transform.rotation.x = 0.0
+		t1.transform.rotation.y = -0.707
+		t1.transform.rotation.z = 0.0
+		t1.transform.rotation.w = 0.707 
 		
-		return do_transform_pose(ArucoPose, t1)
+		return do_transform_pose(do_transform_pose(ArucoPose, t1),t2)
 
 
 

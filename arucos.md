@@ -33,11 +33,9 @@ geometry_msgs/Pose[] poses
 
 ## Way to consider the information
 * Le nombre de arucos est fixe, il est nécessaire de garder en mémoire la position de ces arucos de façon statique, ces positions sont lisibles dans `\aruco_poses` et sont dans la frame `camera_frame` (TBC)  
-* Remettre dans les positions dans la frame `map`(?)
+* Remettre dans les positions dans la frame `map`
 * Incorporer cette information dans le grid_mapping
 
-## TODO asap
-* Send array of frames through a topic to be listened by the mapping
 
 ## Exploration of the whole map for aruco detection
 Il est nécessaire de retenir les murs qui ont été vus par la caméra afin de savoir où chercher des arucos markers  
@@ -54,15 +52,16 @@ Ce raisonnement devrait être fait dans les fonctions de mapping
 
 Comment être sur que les murs vu de cotés ne sont pas comptés?
 
-Manhattan distance => Does not work, consider euclidian? See prove of concept
+Manhattan distance => Does not work, consider euclidian? See prove of concept  
+Utiliser RayCast
 
 ## Pizza delivery
 Second part of the demonstration, is to have the robot to navigate to a given list of arucos.  
-When receiving this list, we must be able to compute the location in which the robot should arrive (30 cm IN FRONT of the aruco)  
-How to know to which location the robot must be with the right orientation? 
-How to get the right order to visit the arucos?  
-How to be sure to be on the right side of the aruco ? Having the orientation should be nice, since we could compute the transform.  
-What is the actual orientation measured?
+When receiving this list, we must be able to compute the location in which the robot should arrive (50 cm IN FRONT of the aruco)  
+How to know to which location the robot must be with the right orientation? Done in aruco_subcription
+How to get the right order to visit the arucos?  TBD
+How to be sure to be on the right side of the aruco ? Having the orientation should be nice, since we could compute the transform (Done in aruco_subcription).  
+What is the actual orientation measured? TBC
 
 ## Kalman filter
 To integrate all the data, we need a Kalman filter to incorporate new sensor reading  
@@ -71,3 +70,17 @@ I think the Kalman filter should be done on the transform, to get the most accur
 TBD soon : 
 * Find good transform for given aruco position to visit
 * Test Kalmann filter
+
+## Pose to visit
+
+Using gazebo, I saw that the pose where the robot should go is  
+* x_aruco 
+* z_aruco
+* y_aruco -0.5
+* rool_aruco
+* pitch_aruco - 1.57
+* yaw_aruco + 3.14
+
+Does it makes sense ?  
+On gazebo, the orientation seems nice but not the position... How come?  
+I think, that the only position that should be modified is x_aruco with a + 0.5 (due to the angle we have a transform fixed)
