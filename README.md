@@ -1,24 +1,5 @@
 # Project Robotics 
 
-## Getting started
-* Créer un node dans lequel on crée une map que l'on rempli avec obstacles et arrucos. Cette map est notre propre mapping (idée faire une map comme IA).
-    - Comment lire les obstacles renvoyées par le lidar?
-        Se renseigner sur occupacy grid du topic map
-    - Comment considérer les positions?
-    - Quelle discrétisation de grille?
-
-* Modéliser une trajectoire entre les aruccos efficace (idée Pacman)
-    - Comment tenir compte des réalités physiques ? 
-    - Qui des obstacles qui bougent?
-
-
-## Occupancy Grid
-nav_msgs/OccupancyGrid
-Pour écho, ros2 topic echo map
-On a width, height et une liste de points à interpréter comme les positions de la map et la certitude d'occupancy 
-L'origine de la map est donnée donc peut update depuis une autre position
-Donc il faut créer un node qui lit ce topic et crée notre propre carte
-
 ##  How to start the robot?
 - Get IP : https://tplinkeap.net 
 Username : admin, mdp : chiefbot
@@ -38,7 +19,12 @@ Username : admin, mdp : chiefbot
 
 
 ## Useful commands
-- reboot instead of shuting down : sudo reboot
-- see percentage of battery : ros2 topic echo /battery_state
+- reboot instead of shuting down : ``sudo reboot``
+- see percentage of battery : ``ros2 topic echo /battery_state``
+
+## Push on gitlab
+Before commit the changes, modify the user data of git on the local device
+- ```git config --global user.email "you@example.com"```
+- ```git config --global user.name "Your Name"``
 
 
