@@ -21,5 +21,5 @@ To use TCP, we can use python_tsp (Docs : https://pypi.org/project/python_tsp/).
 To install the TCP module : ```pip install python-tsp```  
 To import : ```from python_tsp.exact import solve_tsp_dynamic_programming```  
 To use TCP, we have distance matrix between all the pose to visit and we call ```permutation, distance = solve_tsp_dynamic_programming(distance_matrix)```
-TCP works for closed loop => In this project, we don't need to be back to inidistance_matrix[:, 0] = 0tial position  
+TCP works for closed loop => In this project, we don't need to be back to initial position  
 We use open version of the TCP => set all elements of the first column of the distance matrix to zero ```distance_matrix[:, 0] = 0 ```
