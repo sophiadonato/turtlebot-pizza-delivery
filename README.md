@@ -25,6 +25,6 @@ Username : admin, mdp : chiefbot
 ## Push on gitlab
 Before commit the changes, modify the user data of git on the local device
 - ```git config --global user.email "you@example.com"```
-- ```git config --global user.name "Your Name"``
+- ```git config --global user.name "Your Name"```
 
 
