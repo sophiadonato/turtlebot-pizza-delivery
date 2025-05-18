@@ -1,0 +1,24 @@
+[1.511s] Invoking command in '/home/arnaud/group9/projet/group9_ws/src/group9': PYTHONPATH=/home/arnaud/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/arnaud/group9/projet/group9_ws/build/group9/build install --record /home/arnaud/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data
+[2.018s] running egg_info
+[2.019s] writing ../../build/group9/group9.egg-info/PKG-INFO
+[2.020s] writing dependency_links to ../../build/group9/group9.egg-info/dependency_links.txt
+[2.020s] writing entry points to ../../build/group9/group9.egg-info/entry_points.txt
+[2.020s] writing requirements to ../../build/group9/group9.egg-info/requires.txt
+[2.021s] writing top-level names to ../../build/group9/group9.egg-info/top_level.txt
+[2.100s] reading manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[2.102s] writing manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[2.102s] running build
+[2.103s] running build_py
+[2.103s] copying group9/PathOfDelivering.py -> /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9
+[2.103s] running install
+[2.105s] running install_lib
+[2.107s] copying /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9/PathOfDelivering.py -> /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9
+[2.108s] byte-compiling /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9/PathOfDelivering.py to PathOfDelivering.cpython-38.pyc
+[2.113s] running install_data
+[2.113s] running install_egg_info
+[2.117s] removing '/home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9-0.0.0-py3.8.egg-info' (and everything under it)
+[2.117s] Copying ../../build/group9/group9.egg-info to /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9-0.0.0-py3.8.egg-info
+[2.119s] running install_scripts
+[2.158s] Installing path script to /home/arnaud/group9/projet/group9_ws/install/group9/lib/group9
+[2.159s] writing list of installed files to '/home/arnaud/group9/projet/group9_ws/build/group9/install.log'
+[2.203s] Invoked command in '/home/arnaud/group9/projet/group9_ws/src/group9' returned '0': PYTHONPATH=/home/arnaud/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/arnaud/group9/projet/group9_ws/build/group9/build install --record /home/arnaud/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data

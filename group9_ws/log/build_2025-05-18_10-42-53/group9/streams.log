@@ -1,0 +1,33 @@
+[1.601s] Invoking command in '/home/arnaud/group9/projet/group9_ws/src/group9': PYTHONPATH=/home/arnaud/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/arnaud/group9/projet/group9_ws/build/group9/build install --record /home/arnaud/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data
+[2.120s] running egg_info
+[2.122s] writing ../../build/group9/group9.egg-info/PKG-INFO
+[2.123s] writing dependency_links to ../../build/group9/group9.egg-info/dependency_links.txt
+[2.123s] writing entry points to ../../build/group9/group9.egg-info/entry_points.txt
+[2.123s] writing requirements to ../../build/group9/group9.egg-info/requires.txt
+[2.124s] writing top-level names to ../../build/group9/group9.egg-info/top_level.txt
+[2.208s] reading manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[2.210s] writing manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[2.210s] running build
+[2.210s] running build_py
+[2.211s] copying group9/PathOfDelivering.py -> /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9
+[2.211s] running install
+[2.213s] running install_lib
+[2.215s] creating /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9
+[2.216s] copying /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9/PathOfDelivering.py -> /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9
+[2.216s] copying /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9/action.py -> /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9
+[2.216s] copying /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9/map_subscriber.py -> /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9
+[2.217s] copying /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9/__init__.py -> /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9
+[2.217s] copying /home/arnaud/group9/projet/group9_ws/build/group9/build/lib/group9/grid_mapping.py -> /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9
+[2.217s] byte-compiling /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9/PathOfDelivering.py to PathOfDelivering.cpython-38.pyc
+[2.223s] byte-compiling /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9/action.py to action.cpython-38.pyc
+[2.225s] byte-compiling /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9/map_subscriber.py to map_subscriber.cpython-38.pyc
+[2.230s] byte-compiling /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9/__init__.py to __init__.cpython-38.pyc
+[2.230s] byte-compiling /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9/grid_mapping.py to grid_mapping.cpython-38.pyc
+[2.232s] running install_data
+[2.233s] copying package.xml -> /home/arnaud/group9/projet/group9_ws/install/group9/share/group9
+[2.233s] running install_egg_info
+[2.239s] Copying ../../build/group9/group9.egg-info to /home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages/group9-0.0.0-py3.8.egg-info
+[2.241s] running install_scripts
+[2.291s] Installing path script to /home/arnaud/group9/projet/group9_ws/install/group9/lib/group9
+[2.294s] writing list of installed files to '/home/arnaud/group9/projet/group9_ws/build/group9/install.log'
+[2.343s] Invoked command in '/home/arnaud/group9/projet/group9_ws/src/group9' returned '0': PYTHONPATH=/home/arnaud/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/arnaud/group9/projet/group9_ws/install/group9/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/arnaud/group9/projet/group9_ws/build/group9/build install --record /home/arnaud/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data

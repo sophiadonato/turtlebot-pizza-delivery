@@ -17,16 +17,15 @@ class PathOfDelivering(Node):
             'robot_location',
             self.fullLocation,
             10)
-        self.subcriptionIds = self.create_subcription(
+        self.subcriptionIds = self.create_subscription(
             Int32MultiArray,
             'delivery_locations',
             self.getIDs,
             10)
-        self.startingRobotLocation #How to know the robot location at which the path must start?
-        self.subscription
+        self.startingRobotLocation = None #How to know the robot location at which the path must start?
         self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
         self.fullPose= [None]
-        self.poseToVisit = np.empty()
+        self.poseToVisit = np.array([])
 
     def fullLocation(self, msg):
         self.fullPose = msg.poses
