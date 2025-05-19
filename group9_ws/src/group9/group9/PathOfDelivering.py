@@ -22,10 +22,10 @@ class PathOfDelivering(Node):
             'delivery_locations',
             self.getIDs,
             10)
-        self.startingRobotLocation = None #How to know the robot location at which the path must start?
+        self.startingRobotLocation = None #How to know the robot location at which the path must start? -> pose of robot done in our code
         self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
         self.fullPose= [None]
-        self.poseToVisit = np.array([])
+        self.poseToVisit = np.array([]) #init good ? 
 
     def fullLocation(self, msg):
         self.fullPose = msg.poses
