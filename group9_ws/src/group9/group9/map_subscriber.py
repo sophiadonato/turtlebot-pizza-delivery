@@ -156,12 +156,13 @@ class MapSubscriber(Node):
 		result = future.result().result
 		status = future.result().status
 		if status == GoalStatus.STATUS_SUCCEEDED :
-			self.get_logger().info('Goal succeeded !')
+			self.get_logger().info('Goal succeeded, now spinning !')
+			#self.rotating_360()
 			
 		else :
 			self.get_logger().info('Goal failed.')
-
-		self.sent_goal = True
+		
+		self.sent_goal = False
 
 	def find_next_goal(self, grid_mtx, grid):
 		while rclpy.ok() :
