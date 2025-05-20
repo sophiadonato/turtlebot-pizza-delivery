@@ -1,5 +1,0 @@
-[console_scripts]
-action = group9.action:main
-making_360 = group9.making_360:main
-map_subscriber = group9.map_subscriber:main
-
