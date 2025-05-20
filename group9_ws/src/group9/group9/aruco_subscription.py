@@ -7,6 +7,7 @@ from tf2_ros.buffer import Buffer
 from geometry_msgs.msg import Pose, PoseArray,TransformStamped
 from tf2_geometry_msgs import do_transform_pose
 from tf2_ros import TransformException
+from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
 
 class KalmanFilter:
     def __init__(self):
@@ -80,6 +81,9 @@ class ArucoSubscriber(Node):
 		#We implement a Kalman filter to get rid of camera noise
 		self.filters = {}
 		
+		#Broadcaster
+		self.tf_static_broadcaster = StaticTransformBroadcaster(self)
+
 	def aruco_callback(self, arucoMarkers):
 		if len(arucoMarkers.marker_ids) > 0 :
 			id = arucoMarkers.marker_ids[0]
@@ -98,7 +102,7 @@ class ArucoSubscriber(Node):
 				
 			self.filters[id].updateWithPose(pose) #KF on the global aruco location
 			self.ArucoLocations[id] = self.filters[id].get_estimate()
-			self.get_logger().info(f'After Kalman: position.x {pose.position.x},position.y {pose.position.y}')
+			self.make_transforms(id,self.ArucoLocations[id])
 			self.aruco_locations_publisher()
    
 		# if all(pose is not None for pose in self.ArucoLocations):
@@ -120,6 +124,21 @@ class ArucoSubscriber(Node):
 				robotToVisit.poses.append(PoseToVisitForGivenAruco(pose))
 		self.publisher1.publish(locationArucos)
 		self.publisher2.publish(robotToVisit)
+	
+	def make_transforms(self,ID, ArucoPose):
+		t = TransformStamped()
+		t.header.stamp = self.get_clock().now().to_msg()
+		t.header.frame_id = 'Aruco' + str(ID)
+
+		t.transform.translation.x = float(ArucoPose.position.x)
+		t.transform.translation.y = float(ArucoPose.position.y)
+		t.transform.translation.z = float(ArucoPose.position.z)
+
+		t.transform.rotation.x = float(ArucoPose.orientation.x)
+		t.transform.rotation.y = float(ArucoPose.orientation.y)
+		t.transform.rotation.z = float(ArucoPose.orientation.z)
+		t.transform.rotation.w = float(ArucoPose.orientation.w)
+		self.tf_static_broadcaster.sendTransform(t)
 
 def PoseToVisitForGivenAruco(ArucoPose): #To be improved
 		#What is the orientation in the ArucoPose ?
@@ -154,8 +173,6 @@ def PoseToVisitForGivenAruco(ArucoPose): #To be improved
 		return do_transform_pose(do_transform_pose(ArucoPose, t1),t2)
 
 
-
-	
 def main(args=None):
 	rclpy.init(args=args)
 	aruco_subscriber = ArucoSubscriber()
