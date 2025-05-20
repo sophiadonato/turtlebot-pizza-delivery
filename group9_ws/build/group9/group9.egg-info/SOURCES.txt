@@ -8,6 +8,7 @@ setup.py
 ../../build/group9/group9.egg-info/requires.txt
 ../../build/group9/group9.egg-info/top_level.txt
 ../../build/group9/group9.egg-info/zip-safe
+group9/KalmanFilter.py
 group9/__init__.py
 group9/aruco_subscription.py
 resource/group9

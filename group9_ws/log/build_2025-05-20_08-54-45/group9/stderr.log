@@ -1,0 +1,5 @@
+  File "/home/laptop05/Group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/aruco_subscription.py", line 51
+    p.position.x = (float)self.x[0]
+                          ^^^^
+SyntaxError: invalid syntax
+

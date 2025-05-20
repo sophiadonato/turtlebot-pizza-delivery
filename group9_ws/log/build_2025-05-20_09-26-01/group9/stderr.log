@@ -1,0 +1,5 @@
+  File "/home/laptop05/Group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/aruco_subscription.py", line 94
+    			self.get_logger().info(f'position.x {pose.position.x},position.y {pose.position.y}'')
+    			                                                                                   ^
+SyntaxError: unterminated string literal (detected at line 94)
+
