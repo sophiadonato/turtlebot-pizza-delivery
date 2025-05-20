@@ -16,20 +16,20 @@ class Fake(Node):
     def timer_callback(self):
         Ap1 = PoseArray()
         p1 = Pose()
-        p1.position.x = 5.0
-        p1.position.y = 5.0
-        p1.position.z = 5.0
+        p1.position.x = 1.0
+        p1.position.y = 1.0
+        p1.position.z = 1.0
         Ap1.poses.append(p1)
         p2 = Pose()
-        p2.position.x = 5.0
-        p2.position.y = 15.0
-        p2.position.z = 5.0
+        p2.position.x = 1.0
+        p2.position.y = 1.5
+        p2.position.z = 1.0
         Ap1.poses.append(p2)
 
         p3 = Pose()
-        p3.position.x = 15.0
-        p3.position.y = 15.0
-        p3.position.z = 5.0
+        p3.position.x = 1.0
+        p3.position.y = 1.5
+        p3.position.z = 1.5
         Ap1.poses.append(p3)
 
         self.publisher1.publish(Ap1)

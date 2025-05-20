@@ -1,0 +1,5 @@
+  File "/home/laptop05/Group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/fake.py", line 31
+    p3.position.y = 1.5.0
+                       ^^
+SyntaxError: invalid syntax
+
