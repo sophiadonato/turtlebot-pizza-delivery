@@ -48,6 +48,7 @@ def one_ray_cast(map, r_pos_map, angle, p, q, res):
             return False, None, None
         
         if map[i,j] == 1:
+            
             return True, i, j
         
         else: 
@@ -60,7 +61,7 @@ def one_ray_cast(map, r_pos_map, angle, p, q, res):
                 ray_length[1] += unit_step[1]
 
 
-def raycast_360(occupancy_map, r_pos_map, p, q, res, n_rays=360):
+def raycast_360(occupancy_map, r_pos_map, p, q, res, n_rays=1):
 
 
     for i in range(n_rays):
