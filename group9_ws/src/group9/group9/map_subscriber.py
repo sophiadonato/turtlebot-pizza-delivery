@@ -42,15 +42,15 @@ class MapSubscriber(Node):
 		self.grid_matrix = self.load_grid(grid)
 
 		# np.savetxt("matrix.txt", self.grid_matrix)
-		
-		plt.imshow(self.grid_matrix, cmap="viridis")
-		plt.colorbar()
-		plt.savefig("src/group9/map.pdf", dpi=300, bbox_inches='tight')
-		plt.close()
 
 		if(self.sent_goal == False and self.explored_map == False):
 			self.sent_goal = True
 			self.get_logger().info('Sending goal to the robot')
+
+			plt.imshow(self.grid_matrix, cmap="viridis")
+			plt.colorbar()
+			plt.savefig("src/group9/map.pdf", dpi=300, bbox_inches='tight')
+			plt.close()
 
 			# Finding goal 
 			go_to_goal , x_goal, y_goal = self.find_next_goal(self.grid_matrix, grid)
@@ -149,10 +149,11 @@ class MapSubscriber(Node):
 		self.get_logger().info('Sending goal request..')
 
 		self._send_goal_future = self._action_client.send_goal_async(goal_msg)
-
+		self.get_logger().info('Goal sent but not accepted or rejected')
 		self._send_goal_future.add_done_callback(self.goal_response_callback)
 
 	def goal_response_callback(self, future):
+		self.get_logger().info('Enter response callback')
 		goal_handle = future.result()
 		if not goal_handle.accepted:
 			self.get_logger().info('Goal rejected')
