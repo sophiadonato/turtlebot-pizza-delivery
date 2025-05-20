@@ -96,9 +96,9 @@ class MapSubscriber(Node):
 		height = grid.info.height
 		data = grid.data
 		data = np.reshape(data, (height, width))
-		wall_mask  = (data > 60)
+		wall_mask  = (data > 80)
 		no_mask = (data < 30) & (data > 0)
-		unknown = (data >= 30) & (data <= 60)
+		unknown = (data >= 30) & (data <= 80)
 		data[wall_mask] = 1.0
 		data[no_mask] = 0.0
 		data[unknown] = -1
@@ -133,6 +133,9 @@ class MapSubscriber(Node):
 		data[completed_mask] = 1
 		return data
 	
+	def feedback_callback(self, feedback):
+		self.get_logger().info(f'Received feedback:{feedback.feedback}')
+	
 	def send_goal(self, x, y):
 		self.get_logger().info('Waiting for action server..')
 		self._action_client.wait_for_server()
@@ -148,9 +151,10 @@ class MapSubscriber(Node):
 
 		self.get_logger().info('Sending goal request..')
 
-		self._send_goal_future = self._action_client.send_goal_async(goal_msg)
+		self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback = self.feedback_callback)
 		self.get_logger().info('Goal sent but not accepted or rejected')
 		self._send_goal_future.add_done_callback(self.goal_response_callback)
+		self.get_logger().info('passed callback')
 
 	def goal_response_callback(self, future):
 		self.get_logger().info('Enter response callback')

@@ -1,8 +1,7 @@
 https://aaaa.sh/creatures/dda-algorithm-interactive/
 import numpy as np
 import math
-from grid_mapping import index_to_real_world
-from grid_mapping import world_to_index
+from grid_mapping import angle_to_quaternion
 
 
 def one_ray_cast(map, r_pos_map, angle, p, q, res):
