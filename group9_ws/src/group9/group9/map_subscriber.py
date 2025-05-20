@@ -43,10 +43,10 @@ class MapSubscriber(Node):
 
 		# np.savetxt("matrix.txt", self.grid_matrix)
 		
-		# plt.imshow(self.grid_matrix, cmap="viridis")
-		# plt.colorbar()
-		# plt.savefig("src/group9/heatmapNODILATATION.pdf", dpi=300, bbox_inches='tight')
-		# plt.close()
+		plt.imshow(self.grid_matrix, cmap="viridis")
+		plt.colorbar()
+		plt.savefig("src/group9/map.pdf", dpi=300, bbox_inches='tight')
+		plt.close()
 
 		if(self.sent_goal == False and self.explored_map == False):
 			self.sent_goal = True
@@ -91,14 +91,14 @@ class MapSubscriber(Node):
 		
 		return x , y
 
-	def load_grid(grid):
+	def load_grid(self, grid):
 		width = grid.info.width
 		height = grid.info.height
 		data = grid.data
 		data = np.reshape(data, (height, width))
-		wall_mask  = (data > 0.6)
-		no_mask = (data < 0.3) & (data > 0)
-		unknown = (data >= 0.3) & (data <= 0.6)
+		wall_mask  = (data > 60)
+		no_mask = (data < 30) & (data > 0)
+		unknown = (data >= 30) & (data <= 60)
 		data[wall_mask] = 1.0
 		data[no_mask] = 0.0
 		data[unknown] = -1
@@ -106,11 +106,11 @@ class MapSubscriber(Node):
 		for i in range(height):
 			for j in range(width):
 				if i<height-1 and j<width-1:
+					nb_one = 0
 					if data[i,j] == 1:
 						if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
 							data[i,j] = 0
 					else: 
-						nb_one = 0
 						if data[i-1,j-1] == 1:
 							nb_one += 1 
 						if data[i-1,j] == 1:
@@ -127,7 +127,7 @@ class MapSubscriber(Node):
 							nb_one += 1  
 						if data[i+1,j+1] == 1:
 							nb_one += 1 
-						if nb_one >= 1:
+						if nb_one >= 2:
 							completed_mask[i,j] = True                  
 
 		data[completed_mask] = 1

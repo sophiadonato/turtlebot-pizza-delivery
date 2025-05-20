@@ -1,0 +1,45 @@
+[0.550s] Invoking command in '/home/laptop08/group9/projet/group9_ws/src/group9': PYTHONPATH=/home/laptop08/group9/projet/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/group9 build --build-base /home/laptop08/group9/projet/build/group9/build install --record /home/laptop08/group9/projet/build/group9/install.log --single-version-externally-managed install_data
+[0.752s] running egg_info
+[0.752s] creating ../../../build/group9/group9.egg-info
+[0.752s] writing ../../../build/group9/group9.egg-info/PKG-INFO
+[0.752s] writing dependency_links to ../../../build/group9/group9.egg-info/dependency_links.txt
+[0.752s] writing entry points to ../../../build/group9/group9.egg-info/entry_points.txt
+[0.753s] writing requirements to ../../../build/group9/group9.egg-info/requires.txt
+[0.753s] writing top-level names to ../../../build/group9/group9.egg-info/top_level.txt
+[0.753s] writing manifest file '../../../build/group9/group9.egg-info/SOURCES.txt'
+[0.754s] reading manifest file '../../../build/group9/group9.egg-info/SOURCES.txt'
+[0.755s] writing manifest file '../../../build/group9/group9.egg-info/SOURCES.txt'
+[0.755s] running build
+[0.755s] running build_py
+[0.755s] creating /home/laptop08/group9/projet/build/group9/build
+[0.755s] creating /home/laptop08/group9/projet/build/group9/build/lib
+[0.755s] creating /home/laptop08/group9/projet/build/group9/build/lib/group9
+[0.755s] copying group9/making_360.py -> /home/laptop08/group9/projet/build/group9/build/lib/group9
+[0.755s] copying group9/__init__.py -> /home/laptop08/group9/projet/build/group9/build/lib/group9
+[0.755s] copying group9/action.py -> /home/laptop08/group9/projet/build/group9/build/lib/group9
+[0.756s] copying group9/map_subscriber.py -> /home/laptop08/group9/projet/build/group9/build/lib/group9
+[0.756s] running install
+[0.756s] running install_lib
+[0.756s] creating /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9
+[0.756s] copying /home/laptop08/group9/projet/build/group9/build/lib/group9/making_360.py -> /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9
+[0.756s] copying /home/laptop08/group9/projet/build/group9/build/lib/group9/__init__.py -> /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9
+[0.757s] copying /home/laptop08/group9/projet/build/group9/build/lib/group9/action.py -> /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9
+[0.757s] copying /home/laptop08/group9/projet/build/group9/build/lib/group9/map_subscriber.py -> /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9
+[0.757s] byte-compiling /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9/making_360.py to making_360.cpython-310.pyc
+[0.757s] byte-compiling /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9/__init__.py to __init__.cpython-310.pyc
+[0.758s] byte-compiling /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9/action.py to action.cpython-310.pyc
+[0.758s] byte-compiling /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9/map_subscriber.py to map_subscriber.cpython-310.pyc
+[0.760s] running install_data
+[0.760s] creating /home/laptop08/group9/projet/install/group9/share/ament_index
+[0.760s] creating /home/laptop08/group9/projet/install/group9/share/ament_index/resource_index
+[0.760s] creating /home/laptop08/group9/projet/install/group9/share/ament_index/resource_index/packages
+[0.760s] copying resource/group9 -> /home/laptop08/group9/projet/install/group9/share/ament_index/resource_index/packages
+[0.760s] copying package.xml -> /home/laptop08/group9/projet/install/group9/share/group9
+[0.760s] running install_egg_info
+[0.762s] Copying ../../../build/group9/group9.egg-info to /home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info
+[0.762s] running install_scripts
+[0.779s] Installing action script to /home/laptop08/group9/projet/install/group9/lib/group9
+[0.779s] Installing making_360 script to /home/laptop08/group9/projet/install/group9/lib/group9
+[0.779s] Installing map_subscriber script to /home/laptop08/group9/projet/install/group9/lib/group9
+[0.779s] writing list of installed files to '/home/laptop08/group9/projet/build/group9/install.log'
+[0.804s] Invoked command in '/home/laptop08/group9/projet/group9_ws/src/group9' returned '0': PYTHONPATH=/home/laptop08/group9/projet/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/laptop08/group9/projet/install/group9/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/group9 build --build-base /home/laptop08/group9/projet/build/group9/build install --record /home/laptop08/group9/projet/build/group9/install.log --single-version-externally-managed install_data

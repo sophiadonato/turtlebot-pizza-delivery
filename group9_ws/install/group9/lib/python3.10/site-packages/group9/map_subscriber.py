@@ -43,10 +43,10 @@ class MapSubscriber(Node):
 
 		# np.savetxt("matrix.txt", self.grid_matrix)
 		
-		# plt.imshow(self.grid_matrix, cmap="viridis")
-		# plt.colorbar()
-		# plt.savefig("src/group9/heatmapNODILATATION.pdf", dpi=300, bbox_inches='tight')
-		# plt.close()
+		plt.imshow(self.grid_matrix, cmap="viridis")
+		plt.colorbar()
+		plt.savefig("src/group9/map.pdf", dpi=300, bbox_inches='tight')
+		plt.close()
 
 		if(self.sent_goal == False and self.explored_map == False):
 			self.sent_goal = True
@@ -96,32 +96,42 @@ class MapSubscriber(Node):
 		height = grid.info.height
 		data = grid.data
 		data = np.reshape(data, (height, width))
-		origin = grid.info.origin
-
 		wall_mask  = (data > 60)
 		no_mask = (data < 30) & (data > 0)
 		unknown = (data >= 30) & (data <= 60)
 		data[wall_mask] = 1.0
 		data[no_mask] = 0.0
 		data[unknown] = -1
-		unknown_mask = (data == -1)
-		data[unknown_mask] = 0.0
+		completed_mask = np.zeros_like(data, dtype = bool)
 		for i in range(height):
 			for j in range(width):
 				if i<height-1 and j<width-1:
+					nb_one = 0
 					if data[i,j] == 1:
-							if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
-								data[i,j] = 0
+						if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
+							data[i,j] = 0
 					else: 
-						if data[i-1,j] == 1 and data[i+1,j] == 1 and data[i,j-1] == 1 and data[i,j+1] == 1:
-							data[i,j] = 1                  
-		unknown_mask = unknown_mask & (data == 0)
-		final_grid = data
-		#final_grid= binary_dilation(data, iterations=1)
-		final_grid = final_grid.astype(int)
-		final_grid[unknown_mask] = -1
-		
-		return final_grid
+						if data[i-1,j-1] == 1:
+							nb_one += 1 
+						if data[i-1,j] == 1:
+							nb_one += 1 
+						if data[i-1,j+1] == 1:
+							nb_one += 1  
+						if data[i,j-1] == 1:
+							nb_one += 1
+						if data[i,j+1] == 1:
+							nb_one += 1  
+						if data[i+1,j-1] == 1:
+							nb_one += 1 
+						if data[i+1,j] == 1:
+							nb_one += 1  
+						if data[i+1,j+1] == 1:
+							nb_one += 1 
+						if nb_one >= 4:
+							completed_mask[i,j] = True                  
+
+		data[completed_mask] = 1
+		return data
 	
 	def send_goal(self, x, y):
 		self.get_logger().info('Waiting for action server..')
@@ -156,12 +166,13 @@ class MapSubscriber(Node):
 		result = future.result().result
 		status = future.result().status
 		if status == GoalStatus.STATUS_SUCCEEDED :
-			self.get_logger().info('Goal succeeded !')
+			self.get_logger().info('Goal succeeded, now spinning !')
+			#self.rotating_360()
 			
 		else :
 			self.get_logger().info('Goal failed.')
-
-		self.sent_goal = True
+		
+		self.sent_goal = False
 
 	def find_next_goal(self, grid_mtx, grid):
 		while rclpy.ok() :

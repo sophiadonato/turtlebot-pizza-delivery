@@ -10,7 +10,7 @@ setup.py
 ../../build/group9/group9.egg-info/zip-safe
 group9/__init__.py
 group9/action.py
-group9/grid_mapping.py
+group9/making_360.py
 group9/map_subscriber.py
 resource/group9
 test/test_copyright.py
