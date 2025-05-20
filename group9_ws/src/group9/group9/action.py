@@ -10,6 +10,14 @@ class NavigateToPoseActionClient(Node):
     def __init__(self):
         super().__init__("navigate_to_pose_action_client")
         self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+        self.target_x = 0.1
+        self.target_y = 0.5
+        self._timer = self.create_timer(1.0, self._send_goal_timer_callback)
+
+    
+    def _send_goal_timer_callback(self):
+        self._timer.cancel()
+        self.send_goal(self.target_x, self.target_y)
 
     
     def send_goal(self, x, y):
@@ -57,7 +65,6 @@ class NavigateToPoseActionClient(Node):
 def main():
     rclpy.init()
     action_client = NavigateToPoseActionClient()
-    action_client.send_goal(1.0, 0.0)
     rclpy.spin(action_client)
 
 if __name__ == '__main__':

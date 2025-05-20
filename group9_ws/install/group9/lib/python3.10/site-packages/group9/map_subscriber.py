@@ -150,9 +150,7 @@ class MapSubscriber(Node):
 
 		self._send_goal_future = self._action_client.send_goal_async(goal_msg)
 		self.get_logger().info('Goal sent but not accepted or rejected')
-		rclpy.spin_until_future_complete(self, self._send_goal_future)
-		self.get_logger().info('Future complete calling callbakc manually')
-		self.goal_response_callback(self._send_goal_future)
+		self._send_goal_future.add_done_callback(self.goal_response_callback)
 
 	def goal_response_callback(self, future):
 		self.get_logger().info('Enter response callback')
