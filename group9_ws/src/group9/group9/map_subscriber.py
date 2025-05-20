@@ -26,7 +26,7 @@ class MapSubscriber(Node):
 			self.listener_callback,
 			10)
 		self.subscription
-		self.grid_matrix = np.zeros((2000, 2000))
+		self.grid_matrix = np.zeros((2000, 2000), dtype = float)
 		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
 		self.sent_goal = False
 		self.explored_map = False
@@ -34,19 +34,15 @@ class MapSubscriber(Node):
 		self.tf_listener = TransformListener(self.tf_buffer, self)
 		self.x_robot = 0
 		self.y_robot = 0
+		self.p = np.zeros(3)
+		self.q = np.zeros(4)
+		self.occ_res = 0 
+		self.width = 0
+		self.height = 0
 
 		
 	def listener_callback(self, grid):
-		# self.get_logger().info('Occupancy grid management')
-		
 		self.grid_matrix = self.load_grid(grid)
-
-		# np.savetxt("matrix.txt", self.grid_matrix)
-		
-		# plt.imshow(self.grid_matrix, cmap="viridis")
-		# plt.colorbar()
-		# plt.savefig("src/group9/heatmapNODILATATION.pdf", dpi=300, bbox_inches='tight')
-		# plt.close()
 
 		if(self.sent_goal == False and self.explored_map == False):
 			self.sent_goal = True
@@ -64,7 +60,7 @@ class MapSubscriber(Node):
 	def angle_to_quaternion(self, qx, qy, qz, qw):
 		return math.atan2(2*(qw * qz + qx * qy), 1-2*(qy**2 + qz**2))
 
-	def index_to_real_world(self, i, j, res, p, q):
+	def index_to_real_world(self, i, j):
 		""" Fonction that transform the index of the Occupancy Grid to a real world position
 			where the real world origin is determined when the robot is launched
 			
@@ -78,50 +74,95 @@ class MapSubscriber(Node):
 			return: 
 				x, y: the coordinate of the cellule(j,i) in the real world
 		"""
-		theta = self.angle_to_quaternion(q[0], q[1], q[2], q[3])
+		theta = self.angle_to_quaternion(self.q[0], self.q[1], self.q[2], self.q[3])
 		
-		x_loc = (i + 0.5) * res
-		y_loc = (j + 0.5) * res
+		x_loc = (j + 0.5) * self.occ_res
+		y_loc = (i + 0.5) * self.occ_res
 		
 		dx = x_loc * np.cos(theta) - y_loc * np.sin(theta)
 		dy = x_loc * np.sin(theta) +  y_loc * np.cos(theta)
 		
-		x = p[0] + dx
-		y = p[1] + dy
+		x = self.p[0] + dx
+		y = self.p[1] + dy
 		
 		return x , y
 
-	def load_grid(self, grid):
-		width = grid.info.width
-		height = grid.info.height
-		data = grid.data
-		data = np.reshape(data, (height, width))
-		origin = grid.info.origin
+	def world_to_index(self, x, y):
+		""" Fonction that transform the index of the Occupancy Grid to a real world position
+			where the real world origin is determined when the robot is launched
+			
+			argument:
+				- x: x-coordinate in the real world
+				- y: y-coordinate in the real world
+				- res: resolution of the Occupancy Grid
+				- p: vector of 3 dimensions = coordinate of the origin of the Occupancy Grid
+				- q: vector of 4 dimensions = quaternion of the Occupancy Grid with respect to the real world
+				
+			return: 
+				i, j: index of the point (x,y) in the Occupancy grid
 
+			/!\: in Occupancy Grid, the cell [0,0] is the low left corner.
+		"""
+		theta = self.angle_to_quaternion(self.q[0], self.q[1], self.q[2], self.q[3])
+
+		dx = x - self.p[0]
+		dy = y - self.p[1]
+
+		x_loc = dx * np.cos(theta) + dy * np.sin(theta)
+		y_loc = dy * np.cos(theta) - dx * np.sin(theta)
+
+		j = int(x_loc / self.occ_res - 0.5)
+		i = int(y_loc / self.occ_res - 0.5)
+
+		return i , j
+	def load_grid(self, grid):
+		self.width = grid.info.width
+		self.height = grid.info.height
+		origin = grid.info.origin
+		self.p = np.array([origin.position.x, origin.position.y, origin.position.z])
+		self.q = np.array([origin.orientation.x, origin.orientation.y, origin.orientation.z, origin.orientation.w])
+		self.occ_res = grid.info.resolution
+		data = grid.data
+		data = np.reshape(data, (self.height, self.width))
 		wall_mask  = (data > 60)
 		no_mask = (data < 30) & (data > 0)
 		unknown = (data >= 30) & (data <= 60)
 		data[wall_mask] = 1.0
 		data[no_mask] = 0.0
-		data[unknown] = -1
-		unknown_mask = (data == -1)
-		data[unknown_mask] = 0.0
-		for i in range(height):
-			for j in range(width):
-				if i<height-1 and j<width-1:
+		data[unknown] = -1.0
+		completed_mask = np.zeros_like(data, dtype = bool)
+		for i in range(self.height):
+			for j in range(self.width):
+				if i<self.height-1 and j<self.width-1:
+					nb_one = 0
 					if data[i,j] == 1:
-							if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
-								data[i,j] = 0
+						if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
+							data[i,j] = 0
 					else: 
-						if data[i-1,j] == 1 and data[i+1,j] == 1 and data[i,j-1] == 1 and data[i,j+1] == 1:
-							data[i,j] = 1                  
-		unknown_mask = unknown_mask & (data == 0)
-		final_grid = data
-		#final_grid= binary_dilation(data, iterations=1)
-		final_grid = final_grid.astype(int)
-		final_grid[unknown_mask] = -1
-		
-		return final_grid
+						if data[i-1,j-1] == 1:
+							nb_one += 1 
+						if data[i-1,j] == 1:
+							nb_one += 1 
+						if data[i-1,j+1] == 1:
+							nb_one += 1  
+						if data[i,j-1] == 1:
+							nb_one += 1
+						if data[i,j+1] == 1:
+							nb_one += 1  
+						if data[i+1,j-1] == 1:
+							nb_one += 1 
+						if data[i+1,j] == 1:
+							nb_one += 1  
+						if data[i+1,j+1] == 1:
+							nb_one += 1 
+						if nb_one >= 2:
+							completed_mask[i,j] = True                  
+
+		data[completed_mask] = 1
+		return data
+	
+	def feedback_callback(self, feedback):
+		self.get_logger().info(f'Received feedback:{feedback.feedback}')
 	
 	def send_goal(self, x, y):
 		self.get_logger().info('Waiting for action server..')
@@ -138,8 +179,7 @@ class MapSubscriber(Node):
 
 		self.get_logger().info('Sending goal request..')
 
-		self._send_goal_future = self._action_client.send_goal_async(goal_msg)
-
+		self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback = self.feedback_callback)
 		self._send_goal_future.add_done_callback(self.goal_response_callback)
 
 	def goal_response_callback(self, future):
@@ -156,14 +196,15 @@ class MapSubscriber(Node):
 		result = future.result().result
 		status = future.result().status
 		if status == GoalStatus.STATUS_SUCCEEDED :
-			self.get_logger().info('Goal succeeded !')
+			self.get_logger().info('Goal succeeded, now spinning !')
+			#self.rotating_360()
 			
 		else :
 			self.get_logger().info('Goal failed.')
+		
+		self.sent_goal = False
 
-		self.sent_goal = True
-
-	def find_next_goal(self, grid_mtx, grid):
+	def find_next_goal(self, grid_mtx):
 		while rclpy.ok() :
 			try:
 				transform = self.tf_buffer.lookup_transform(
@@ -247,16 +288,9 @@ class MapSubscriber(Node):
 					middle = (i,j)
 			frontier_middles.append(middle)
 
-		
-
-		# Getting true coordinates of each middle
-		origin = grid.info.origin
-		p = np.array([origin.position.x, origin.position.y, origin.position.z])
-		q = np.array([origin.orientation.x, origin.orientation.y, origin.orientation.z, origin.orientation.w])
-
 		frontier_middles_coord = []
 		for i, j in frontier_middles :
-			x, y = self.index_to_real_world(j,i, grid.info.resolution, p, q)
+			x, y = self.index_to_real_world(i,j)
 			frontier_middles_coord.append((x,y))
 		
 
@@ -274,6 +308,102 @@ class MapSubscriber(Node):
 		plt.close()
 
 		return True, x_goal, y_goal
+	
+
+	def one_ray_cast(self, r_pos_map, angle):
+
+		i_max = self.height
+		j_max = self.width
+
+		rd = [np.cos(angle), np.sin(angle)]
+		
+		step = np.sign(rd)
+
+		
+		theta = self.angle_to_quaternion(self.q[0], self.q[1], self.q[2], self.q[3])
+		dx = r_pos_map[0] - self.p[0]
+		dy = r_pos_map[1] - self.p[1]
+
+		x_loc = dx * np.cos(theta) + dy * np.sin(theta)
+		y_loc = dy * np.cos(theta) - dx * np.sin(theta)
+
+		j_float = x_loc / self.occ_res - 0.5
+		i_float = y_loc / self.occ_res - 0.5
+		j = math.floor(j_float)
+		i = math.floor(i_float)
+
+		x_test, y_test = self.index_to_real_world(i, j)
+
+		self.get_logger().info(f'i = {i}')
+		self.get_logger().info(f'j = {j}')
+		self.get_logger().info(f'x_robot = {r_pos_map[0]}')
+		self.get_logger().info(f'y_robot = {r_pos_map[1]}')
+
+		self.get_logger().info(f'x_test = {x_test}')
+		self.get_logger().info(f'y_test = {y_test}')
+		frac = [j_float - j, i_float - i] 
+
+		unit_step = [np.sqrt(1 + (rd[1]/rd[0])**2)if rd[0] != 0 else float('inf'),np.sqrt(1 + (rd[0]/rd[1])**2)if rd[1] != 0 else float('inf') ]
+		#unit_step = [ abs(1 / rd[0]) if rd[0] != 0 else float('inf'),abs(1 / rd[1]) if rd[1] != 0 else float('inf')]
+
+
+		ray_length = np.zeros(2)
+		if (rd[0] < 0):
+			ray_length[0] = frac[0] * unit_step[0]
+		else:
+			ray_length[0] = (1 - frac[0]) * unit_step[0]
+
+		if (rd[1] < 0):
+			ray_length[1] = frac[1] * unit_step[1]
+		else:
+			ray_length[1] = (1 - frac[1]) * unit_step[1]
+
+		true_xlen = ray_length[0] * self.occ_res
+		true_ylen = ray_length[1] * self.occ_res
+		true_length = np.sqrt(true_xlen**2 + true_ylen ** 2)
+
+		i_prev = i
+		j_prev = j
+
+		self.get_logger().info(f'true_length = {true_length}')
+
+		while true_length < 2:
+			if i < 0 or j < 0 or i >= i_max - 1 or j >= j_max- 1:
+				return False, None, None
+			
+			
+			if self.grid_matrix[i,j] == 1.0:
+				return True, i_prev, j_prev
+			
+			else: 
+				i_prev = i
+				j_prev = j
+				if (ray_length[0] < ray_length[1]):
+					j = int( j + step[0])
+					ray_length[0] += unit_step[0]
+				
+				else:       
+					i = int(i + step[1])
+					ray_length[1] += unit_step[1]
+			true_xlen = ray_length[0] * self.occ_res
+			true_ylen = ray_length[1] * self.occ_res
+			true_length = np.sqrt(true_xlen**2 + true_ylen ** 2)
+
+		return False, 0, 0
+
+	def raycast_360(self, n_rays=300):
+		r_pos_map = [self.x_robot, self.y_robot]
+		for n in range(n_rays):
+			if n==0:
+				continue
+			self.get_logger().info(f'n = {n}')
+			angle = n * 2 * np.pi / n_rays
+			hit, i, j = self.one_ray_cast(r_pos_map, angle)
+			if hit:
+				self.get_logger().info(f'i = {i}')
+				self.get_logger().info(f'j = {j}')
+
+				self.grid_matrix[i,j] = 2.0 #à voir ce qu'on veut faire avec
 
 def main(args=None):
 	rclpy.init(args=args)
