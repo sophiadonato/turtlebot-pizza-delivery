@@ -22,7 +22,7 @@ class PathOfDelivering(Node):
             'delivery_locations',
             self.getIDs,
             10)
-        self.startingRobotLocation = None #How to know the robot location at which the path must start? -> pose of robot done in our code
+        self.startingRobotLocation = Pose() #How to know the robot location at which the path must start? -> pose of robot done in our code
         self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
         self.fullPose= [None]
         self.poseToVisit = np.array([]) #init good ? 
@@ -36,18 +36,18 @@ class PathOfDelivering(Node):
             self.id = msg.data
             self.nbArucoToVisit = len(self.id)
             for i in range(0,len(self.fullPose)):
-                if i in id:
-                    self.poseToVisit.append(self.fullPose[i])
+                if i in self.id:
+                    np.append(self.poseToVisit,np.array([self.fullPose[i]]))
             self.destroy_subscription(self.subcriptionIds)
-            self.computation(self)
+            self.computation()
     
     def computation(self):
         distance_matrix = np.zeros((self.nbArucoToVisit + 1,self.nbArucoToVisit + 1))
         robotLocation = np.array(self.startingRobotLocation)
-        poses = np.concatenate(robotLocation,self.poseToVisit)
+        poses = np.append(robotLocation,self.poseToVisit)
         for i in range(0,self.nbArucoToVisit +1): 
             for j in range(i + 1, self.nbArucoToVisit + 1):
-                distance_matrix[i][j] = self.computeEstimatedDistance(poses[i], poses[j])
+                distance_matrix[i][j] = self.computeEstimatedDistance(poses[i], poses[j]) #Check indexes
                 distance_matrix[j][i] = distance_matrix[i][j]
         distance_matrix[:,0] = 0
         permutation,_ = solve_tsp_dynamic_programming(distance_matrix)

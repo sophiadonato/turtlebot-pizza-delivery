@@ -1,3 +1,4 @@
 [console_scripts]
+fake = group9.fake:main
 path = group9.PathOfDelivering:main
 

@@ -10,6 +10,7 @@ setup.py
 ../../build/group9/group9.egg-info/zip-safe
 group9/PathOfDelivering.py
 group9/__init__.py
+group9/fake.py
 resource/group9
 test/test_copyright.py
 test/test_flake8.py

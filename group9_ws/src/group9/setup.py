@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
         	'path= group9.PathOfDelivering:main',
+            'fake = group9.fake:main',
         ],
     },
 )
