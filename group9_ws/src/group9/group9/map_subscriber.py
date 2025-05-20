@@ -91,37 +91,47 @@ class MapSubscriber(Node):
 		
 		return x , y
 
-	def load_grid(self, grid):
+	def load_grid(grid):
 		width = grid.info.width
 		height = grid.info.height
 		data = grid.data
 		data = np.reshape(data, (height, width))
-		origin = grid.info.origin
-
-		wall_mask  = (data > 60)
-		no_mask = (data < 30) & (data > 0)
-		unknown = (data >= 30) & (data <= 60)
+		wall_mask  = (data > 0.6)
+		no_mask = (data < 0.3) & (data > 0)
+		unknown = (data >= 0.3) & (data <= 0.6)
 		data[wall_mask] = 1.0
 		data[no_mask] = 0.0
 		data[unknown] = -1
-		unknown_mask = (data == -1)
-		data[unknown_mask] = 0.0
+		completed_mask = np.zeros_like(data, dtype = bool)
 		for i in range(height):
 			for j in range(width):
 				if i<height-1 and j<width-1:
 					if data[i,j] == 1:
-							if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
-								data[i,j] = 0
+						if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
+							data[i,j] = 0
 					else: 
-						if data[i-1,j] == 1 and data[i+1,j] == 1 and data[i,j-1] == 1 and data[i,j+1] == 1:
-							data[i,j] = 1                  
-		unknown_mask = unknown_mask & (data == 0)
-		final_grid = data
-		#final_grid= binary_dilation(data, iterations=1)
-		final_grid = final_grid.astype(int)
-		final_grid[unknown_mask] = -1
-		
-		return final_grid
+						nb_one = 0
+						if data[i-1,j-1] == 1:
+							nb_one += 1 
+						if data[i-1,j] == 1:
+							nb_one += 1 
+						if data[i-1,j+1] == 1:
+							nb_one += 1  
+						if data[i,j-1] == 1:
+							nb_one += 1
+						if data[i,j+1] == 1:
+							nb_one += 1  
+						if data[i+1,j-1] == 1:
+							nb_one += 1 
+						if data[i+1,j] == 1:
+							nb_one += 1  
+						if data[i+1,j+1] == 1:
+							nb_one += 1 
+						if nb_one >= 1:
+							completed_mask[i,j] = True                  
+
+		data[completed_mask] = 1
+		return data
 	
 	def send_goal(self, x, y):
 		self.get_logger().info('Waiting for action server..')
