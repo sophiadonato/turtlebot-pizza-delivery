@@ -33,7 +33,7 @@ def index_to_real_world(i, j, res, p, q):
     
     return x , y
 
-def load_grid(grid, world_matrix):
+def load_grid(grid, data):
     world_shape = [1000, 1000]
     world_res = 0.005
     world_center = [500, 500]
@@ -53,26 +53,26 @@ def load_grid(grid, world_matrix):
             i_world = int(world_center[1] + x / world_res)  # column
 
             if 0<= i_world < world_shape[1] and 0<=  j_world < world_shape[0]:
-                world_matrix[i_world, j_world] = data[i,j]
+                data[i_world, j_world] = data[i,j]
 
     
-    world_matrix[world_matrix > 0.7] = 1.0
-    world_matrix[(world_matrix < 0.3) & (world_matrix > 0)] = 0.0
-    unknown = (world_matrix >= 0.3) & (world_matrix <= 0.7)
-    world_matrix[unknown] = -1
-    unknown_mask = (world_matrix == -1)
-    world_matrix[unknown_mask] = 0.0
+    data[data > 0.7] = 1.0
+    data[(data < 0.3) & (data > 0)] = 0.0
+    unknown = (data >= 0.3) & (data <= 0.7)
+    data[unknown] = -1
+    unknown_mask = (data == -1)
+    data[unknown_mask] = 0.0
     for i in range(height):
         for j in range(width):
             if i<height-1 and j<width-1:
-                if world_matrix[i,j] == 1:
-                        if world_matrix[i-1,j] == 0 and world_matrix[i+1,j] == 0 and world_matrix[i,j-1] == 0 and world_matrix[i,j+1] == 0:
-                            world_matrix[i,j] = 0
+                if data[i,j] == 1:
+                        if data[i-1,j] == 0 and data[i+1,j] == 0 and data[i,j-1] == 0 and data[i,j+1] == 0:
+                            data[i,j] = 0
                 else: 
-                    if world_matrix[i-1,j] == 1 and world_matrix[i+1,j] == 1 and world_matrix[i,j-1] == 1 and world_matrix[i,j+1] == 1:
-                        world_matrix[i,j] = 1                  
-    unknown_mask = unknown_mask & (world_matrix == 0)
-    final_matrix = binary_dilation(world_matrix, iterations=1)
+                    if data[i-1,j] == 1 and data[i+1,j] == 1 and data[i,j-1] == 1 and data[i,j+1] == 1:
+                        data[i,j] = 1                  
+    unknown_mask = unknown_mask & (data == 0)
+    final_matrix = binary_dilation(data, iterations=1)
     final_matrix = final_matrix.astype(int)
     final_matrix[unknown_mask] = -1
     
