@@ -6,7 +6,7 @@ Username : admin, mdp : chiefbot
 - ssh ubuntu@{IP} mdp: turtlebot
 - bring up the robot: ```ros2 launch turtlebot3_bringup robot.launch.py```
 - launch cartographer: ```ros2 launch turtlebot3_cartographer cartographer.launch.py```
-- launch navigation2 : ```ros2 launch turtlebot3_navigation2 navigation2.launch.py map:=$HOME/map.yaml```
+- launch navigation2 : ```ros2 launch turtlebot3_navigation2 navigation2.launch.py params_file:='/home/laptop**/group9/projet/group9_ws/my_params.yaml'```
 - launch teleop : ```ros2 run turtlebot3_teleop teleop_keyboard```
 
 
