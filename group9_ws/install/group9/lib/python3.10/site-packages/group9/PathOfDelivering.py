@@ -27,7 +27,10 @@ class PathOfDelivering(Node):
         self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
         self.fullPose= [None]
         self.poseToVisit = np.array([]) #init good ? 
-        self.compute_path_to_pose_client = ActionClient(self, ComputePathToPose, '/compute_path_to_pose')
+
+        # Action client to compute path to pose
+        self.compute_path_to_pose_client = ActionClient(self, ComputePathToPose, 'compute_path_to_pose')
+        self.computing_distance = False
 
     def fullLocation(self, msg):
         self.fullPose = msg.poses
@@ -50,7 +53,7 @@ class PathOfDelivering(Node):
         for i in range(0,self.nbArucoToVisit +1): 
             for j in range(i + 1, self.nbArucoToVisit + 1):
                 self.get_logger().info(f'Before computation Distance')
-                #distance_matrix[i][j] = self.computeEstimatedDistance(poses[i], poses[j]) #Check indexes
+                distance_matrix[i][j] = self.computeEstimatedDistance(poses[i], poses[j]) #Check indexes
                 distance_matrix[i][j] = i*j*2.5
                 distance_matrix[j][i] = distance_matrix[i][j]
         distance_matrix[:,0] = 0
@@ -64,29 +67,29 @@ class PathOfDelivering(Node):
         self.publisher.publish(sequence)
     
     def computeEstimatedDistance(self, start, end):
-        path = None
-        while path is None:
-            path = self.getPath(start,end)
+        self.getPath(start,end)
+        
+        while True:
+            if self.computing_distance == False:
+                break
         distance = 0.0
         self.get_logger().info(f'before distance computed')
-        for i in range(1, len(path)):
-            x0 = path[i - 1].pose.position.x
-            y0 = path[i - 1].pose.position.y
-            x1 = path[i].pose.position.x
-            y1 = path[i].pose.position.y
+        for i in range(1, len(self.path_poses)):
+            x0 = self.path_poses[i - 1].pose.position.x
+            y0 = self.path_poses[i - 1].pose.position.y
+            x1 = self.path_poses[i].pose.position.x
+            y1 = self.path_poses[i].pose.position.y
             distance += math.hypot(x1 - x0, y1 - y0)
         self.get_logger().info(f'distance computed')
         return distance
     
     def getPath(self, start, goal):
+        self.computing_distance = True
         self.get_logger().info(f'Start Pose: {start.position.x}, {start.position.y}, {start.position.z}')
         self.get_logger().info(f'Goal Pose: {goal.position.x}, {goal.position.y}, {goal.position.z}')
 
         # Wait for the action server to be ready
-        while not self.compute_path_to_pose_client.wait_for_server(timeout_sec=5.0):
-            self.get_logger().info("Waiting for 'compute_path_to_pose' action server...")
-        
-        self.get_logger().info("Action server is ready!")
+        self.compute_path_to_pose_client.wait_for_server()
 
         goal_msg = ComputePathToPose.Goal()
 
@@ -104,34 +107,29 @@ class PathOfDelivering(Node):
         goal_msg.goal = goalPoseStamped
 
         self.get_logger().info('Sending goal...')
-        try:
-            send_goal_future = self.compute_path_to_pose_client.send_goal_async(goal_msg)
-            #rclpy.spin_until_future_complete(self, send_goal_future)
-        except Exception as e:
-            self.get_logger().error(f"Error sending goal: {e}")
-            return None
+        self._send_goal_future = self.compute_path_to_pose_client.send_goal_async(goal_msg)
+        self._send_goal_future.add_done_callback(self.goal_response_callback)
 
-        # Log if goal was accepted
-        goal_handle = send_goal_future.result()
-        self.get_logger().info(f'Goal handle: {goal_handle}')
-        if not goal_handle.accepted:
-            self.get_logger().error(f'Goal was rejected by action server. Status: {goal_handle.status}')
-            return None
-
-        self.get_logger().info('Goal accepted, waiting for result...')
-        get_result_future = goal_handle.get_result_async()
-        #rclpy.spin_until_future_complete(self, get_result_future)
-
-        # Log result
-        result = get_result_future.result()
-        self.get_logger().info(f'Action result: {result}')
-
-        if result.status != GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().warn(f'Path planning failed with status code: {result.status}')
+    def goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted():
+            self.get_logger().info('Goal rejected')
+            return
+        
+        self.get_logger().info('Goal accepted')
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.get_result_callback)
+    
+    def get_result_callback(self, future):
+        status = future.result().status
+        result = future.result().result
+        if status != GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().warn(f'Path planning failed with status code: {status}')
             return None
 
         self.get_logger().info('Planning Done')
-        return result.result.path.poses
+        self.computing_distance = False
+        self.path_poses = result.result.path.poses
 
 
             
