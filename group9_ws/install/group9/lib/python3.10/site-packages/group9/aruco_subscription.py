@@ -85,24 +85,23 @@ class ArucoSubscriber(Node):
 		self.tf_static_broadcaster = StaticTransformBroadcaster(self)
 
 	def aruco_callback(self, arucoMarkers):
-		if len(arucoMarkers.marker_ids) > 0 :
-			id = arucoMarkers.marker_ids[0]
+		for i in range(0, len(arucoMarkers.marker_ids)):
+			id = arucoMarkers.marker_ids[i]
 			self.get_logger().info(f'Aruco information : ID : {id}')
-			pose = arucoMarkers.poses[0]
-			self.get_logger().info(f'Before : position.x {pose.position.x},position.y {pose.position.y}')
+			pose = arucoMarkers.poses[i]
 			try:
 				t = self.tf_buffer.lookup_transform('map','camera_optical_joint',rclpy.time.Time())
 			except TransformException as ex:
 				self.get_logger().info(f'Could not transform map to camera_optical_joint: {ex}')
 				return
 			pose = do_transform_pose(pose,t)
-			self.get_logger().info(f'After: position.x {pose.position.x},position.y {pose.position.y}')
 			if id not in self.filters:
 				self.filters[id] = KalmanFilter()
 				
 			self.filters[id].updateWithPose(pose) #KF on the global aruco location
 			self.ArucoLocations[id] = self.filters[id].get_estimate()
-			self.make_transforms(id,self.ArucoLocations[id])
+			self.make_transforms('Aruco',id,self.ArucoLocations[id])
+			self.make_transforms('Location',id,self.PoseToVisitForGivenAruco(self.ArucoLocations[id], id))
 			self.aruco_locations_publisher()
    
 		# if all(pose is not None for pose in self.ArucoLocations):
@@ -121,14 +120,20 @@ class ArucoSubscriber(Node):
 		for pose in self.ArucoLocations:
 			if pose is not None:
 				locationArucos.poses.append(pose)
-				robotToVisit.poses.append(PoseToVisitForGivenAruco(pose))
+				#robotToVisit.poses.append(PoseToVisitForGivenAruco(pose))
 		self.publisher1.publish(locationArucos)
 		self.publisher2.publish(robotToVisit)
 	
-	def make_transforms(self,ID, ArucoPose):
+	def make_transforms(self,Name, ID, ArucoPose):
 		t = TransformStamped()
 		t.header.stamp = self.get_clock().now().to_msg()
-		t.header.frame_id = 'Aruco' + str(ID)
+		if Name == 'Aruco':
+			t.header.frame_id = 'odom'
+			t.child_frame_id = Name + str(ID)
+		else:
+			t.header.frame_id = 'Aruco' + str(ID)
+			t.child_frame_id = Name + str(ID)
+
 
 		t.transform.translation.x = float(ArucoPose.position.x)
 		t.transform.translation.y = float(ArucoPose.position.y)
@@ -140,38 +145,64 @@ class ArucoSubscriber(Node):
 		t.transform.rotation.w = float(ArucoPose.orientation.w)
 		self.tf_static_broadcaster.sendTransform(t)
 
-def PoseToVisitForGivenAruco(ArucoPose): #To be improved
-		#What is the orientation in the ArucoPose ?
-		#Values have been found using simulations on Gazebo
-		t1 = TransformStamped()
+# def PoseToVisitForGivenAruco(ArucoPose): #To be improved
+# 		#What is the orientation in the ArucoPose ?
+# 		#Values have been found using simulations on Gazebo
+# 		t1 = TransformStamped()
   
-		t1.transform.translation.x = 0.5
-		t1.transform.translation.y = 0.0
-		t1.transform.translation.z = 0.0
+# 		t1.transform.translation.x = 0.5
+# 		t1.transform.translation.y = 0.0
+# 		t1.transform.translation.z = 0.0
 
-		# We want to get a vector that face the wall
-		# We have rotation of the axis of 180 degrees around z axis
-		# And rotation around y of -90 degrees
-		t1.transform.rotation.x = 0.0
-		t1.transform.rotation.y = 0.0
-		t1.transform.rotation.z = 1.0
-		t1.transform.rotation.w = 0.0 
+# 		# We want to get a vector that face the wall
+# 		# We have rotation of the axis of 180 degrees around z axis
+# 		# And rotation around y of -90 degrees
+# 		t1.transform.rotation.x = 0.0
+# 		t1.transform.rotation.y = 0.0
+# 		t1.transform.rotation.z = 0.0
+# 		t1.transform.rotation.w = 0.0 
   
-		t2 = TransformStamped()
+# 		# t2 = TransformStamped()
 
-		t2.transform.translation.x = 0.0
-		t2.transform.translation.y = 0.0
-		t1.transform.translation.z = 0.0
+# 		# t2.transform.translation.x = 0.0
+# 		# t2.transform.translation.y = 0.0
+# 		# t1.transform.translation.z = 0.0
 
-		# We want to get a vector that face the wall
-		# And rotation around y of -90 degrees ? How come? TBC
-		t1.transform.rotation.x = 0.0
-		t1.transform.rotation.y = -0.707
-		t1.transform.rotation.z = 0.0
-		t1.transform.rotation.w = 0.707 
+# 		# # We want to get a vector that face the wall
+# 		# # And rotation around y of -90 degrees ? How come? TBC
+# 		# t1.transform.rotation.x = 0.0
+# 		# t1.transform.rotation.y = -0.707
+# 		# t1.transform.rotation.z = 0.0
+# 		# t1.transform.rotation.w = 0.707 
 		
-		return do_transform_pose(do_transform_pose(ArucoPose, t1),t2)
+# 		#return do_transform_pose(do_transform_pose(ArucoPose, t1),t2)
+# 		return do_transform_pose(ArucoPose,t1)
 
+	# def PoseToVisitForGivenAruco(self,ArucoPose, ID):
+	# 	# Create the transform to move forward in Aruco's frame
+	# 	try:
+	# 		t = self.tf_buffer.lookup_transform('camera_optical_joint','map',rclpy.time.Time())
+	# 	except TransformException as ex:
+	# 		self.get_logger().info(f'Could not transform camera_optical_joint to map: {ex}')
+	# 		return
+	# 	pose = do_transform_pose(ArucoPose,t)
+	# 	pose.position.y += 0.5
+		
+	# 	try:
+	# 		t2 = self.tf_buffer.lookup_transform('map','camera_optical_joint',rclpy.time.Time())
+	# 	except TransformException as ex:
+	# 		self.get_logger().info(f'Could not transform map to camera_optical_joint: {ex}')
+	# 		return
+
+	# 	# Apply this transform relative to the Aruco pose
+	# 	return do_transform_pose(pose, t2)
+	
+	def PoseToVisitForGivenAruco(self,ArucoPose, ID):
+		# Create the transform to move forward in Aruco's frame
+		ArucoPose.position.x += 0.5
+
+		# Apply this transform relative to the Aruco pose
+		return ArucoPose
 
 def main(args=None):
 	rclpy.init(args=args)
