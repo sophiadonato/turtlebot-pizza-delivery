@@ -13,10 +13,10 @@ from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist
 from action_msgs.msg import GoalStatus
 
-class MapSubscriber(Node):
+class MapExplorer(Node):
 
 	def __init__(self):
-		super().__init__('map_subscriber')
+		super().__init__('map_explorer')
 
 		# Subscription to Occupancy map
 		self.map_processing = self.create_subscription(
@@ -438,9 +438,9 @@ class MapSubscriber(Node):
 
 def main(args=None):
 	rclpy.init(args=args)
-	map_subscriber = MapSubscriber()
-	rclpy.spin(map_subscriber)
-	map_subscriber.destroy_node()
+	map_explorer = MapExplorer()
+	rclpy.spin(map_explorer)
+	map_explorer.destroy_node()
 	rclpy.shutdown()
 	
 if __name__ == '__main__':

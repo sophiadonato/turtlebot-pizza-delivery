@@ -11,7 +11,7 @@ setup.py
 group9/__init__.py
 group9/action.py
 group9/making_360.py
-group9/map_subscriber.py
+group9/map_explorer.py
 group9/robot_pose.py
 resource/group9
 test/test_copyright.py
