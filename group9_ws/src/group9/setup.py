@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
         	'action = group9.action:main',
         	'map_subscriber = group9.map_subscriber:main',
-            'making_360 = group9.making_360:main'
+            'making_360 = group9.making_360:main',
+            'robot_pose = group9.robot_pose:main'
         ],
     },
 )

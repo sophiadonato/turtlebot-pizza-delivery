@@ -3,60 +3,87 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from collections import deque
-from scipy.ndimage import binary_dilation
+import time
 
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
 from rclpy.action import ActionClient
 from nav2_msgs.action import NavigateToPose
 from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Twist
 from action_msgs.msg import GoalStatus
-from tf2_ros.buffer import Buffer
-from tf2_ros import TransformException
-from tf2_ros.transform_listener import TransformListener
-
 
 class MapSubscriber(Node):
 
 	def __init__(self):
 		super().__init__('map_subscriber')
-		self.subscription = self.create_subscription(
+
+		# Subscription to Occupancy map
+		self.map_processing = self.create_subscription(
 			OccupancyGrid, 
 			'map', 
-			self.listener_callback,
+			self.map_processing_callback,
 			10)
-		self.subscription
-		self.grid_matrix = np.zeros((2000, 2000), dtype = float)
-		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
-		self.sent_goal = False
-		self.explored_map = False
-		self.tf_buffer = Buffer()
-		self.tf_listener = TransformListener(self.tf_buffer, self)
-		self.x_robot = 0
+		self.map_processing
+
+		# Subscription to Robot pose
+		self.robot_pose = self.create_subscription(PoseStamped, '/robot_pose', self.robot_pose_callback, 10)
+
+		# Discovering the map every 10sec
+		self.map_discovery = self.create_timer(10, self.map_discovery_callback)
+		
+		self.grid_matrix = np.zeros((2000, 2000), dtype = float) #Processed map
+		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose') #Nav2 Action Client
+		self.sent_goal = False #True when robot is processing the goal
+		self.explored_map = False #true when explo phase is finished
+
+		# Robot position
+		self.x_robot = 0 
 		self.y_robot = 0
+
+		# Grid info
 		self.p = np.zeros(3)
 		self.q = np.zeros(4)
 		self.occ_res = 0 
 		self.width = 0
 		self.height = 0
 
-		
-	def listener_callback(self, grid):
+		# Publishing 360-rotation
+		self.publisher_360 = self.create_publisher(
+			Twist, 
+			'/cmd_vel', #command velocity
+			10
+		)
+		self.publisher_360
+
+	# Process the map
+	def map_processing_callback(self, grid):
 		self.grid_matrix = self.load_grid(grid)
 
+	# Discover map
+	def map_discovery_callback(self):
 		if(self.sent_goal == False and self.explored_map == False):
 			self.sent_goal = True
 			self.get_logger().info('Sending goal to the robot')
 
 			# Finding goal 
-			go_to_goal , x_goal, y_goal = self.find_next_goal(self.grid_matrix, grid)
+			go_to_goal , x_goal, y_goal = self.find_next_goal(self.grid_matrix)
 
 			if go_to_goal :
 				self.get_logger().info(f" x goal : {x_goal}, y goal : {y_goal}")
+				self.rotate_360() 
 				self.send_goal(x_goal, y_goal)
+		return
+	
+	# Update robot position
+	def robot_pose_callback(self, msg):
+		self.x_robot = msg.pose.position.x
+		self.y_robot = msg.pose.position.y
+		return 
 			
 
-		
+
+	##### Function to process the map #####
 	def angle_to_quaternion(self, qx, qy, qz, qw):
 		return math.atan2(2*(qw * qz + qx * qy), 1-2*(qy**2 + qz**2))
 
@@ -161,9 +188,10 @@ class MapSubscriber(Node):
 		data[completed_mask] = 1
 		return data
 	
-	def feedback_callback(self, feedback):
-		self.get_logger().info(f'Received feedback:{feedback.feedback}')
-	
+
+	##### Functions to discover the map ######
+
+	# Sending goal
 	def send_goal(self, x, y):
 		self.get_logger().info('Waiting for action server..')
 		self._action_client.wait_for_server()
@@ -179,9 +207,10 @@ class MapSubscriber(Node):
 
 		self.get_logger().info('Sending goal request..')
 
-		self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback = self.feedback_callback)
+		self._send_goal_future = self._action_client.send_goal_async(goal_msg)
 		self._send_goal_future.add_done_callback(self.goal_response_callback)
 
+	# Accept or rejet node
 	def goal_response_callback(self, future):
 		goal_handle = future.result()
 		if not goal_handle.accepted:
@@ -192,36 +221,20 @@ class MapSubscriber(Node):
 		self._get_result_future = goal_handle.get_result_async()
 		self._get_result_future.add_done_callback(self.get_result_callback)
 
+	# Goal reached or failed
 	def get_result_callback(self, future):
 		result = future.result().result
 		status = future.result().status
 		if status == GoalStatus.STATUS_SUCCEEDED :
-			self.get_logger().info('Goal succeeded, now spinning !')
-			#self.rotating_360()
+			self.get_logger().info('Goal succeeded !')
 			
 		else :
 			self.get_logger().info('Goal failed.')
 		
 		self.sent_goal = False
 
+	# Finds next goal position
 	def find_next_goal(self, grid_mtx):
-		while rclpy.ok() :
-			try:
-				transform = self.tf_buffer.lookup_transform(
-					'base_footprint',
-					'map',
-					rclpy.time.Time())
-				break
-			except TransformException as ex:
-				self.get_logger().info(f'Could not transform "base_footprint" to "map": {ex}')
-				rclpy.spin_once(self, timeout_sec=0.1)
-		
-		self.x_robot = transform.transform.translation.x
-		self.y_robot = transform.transform.translation.y
-		self.get_logger().info(f'x position of the robot: {self.x_robot}')
-		self.get_logger().info(f'y position of the robot: {self.y_robot}')
-
-
 		frontier_cells = []
 		neighboors = [(-1, 0), (1,0), (0,-1), (0,1), (-1,-1), (-1, 1), (1, 1), (1, -1)]
 
@@ -302,14 +315,32 @@ class MapSubscriber(Node):
 				x_goal = x
 				y_goal = y
 
-		plt.imshow(self.grid_matrix, cmap="viridis")
-		plt.colorbar()
-		plt.savefig("src/group9/map.pdf", dpi=300, bbox_inches='tight')
-		plt.close()
-
 		return True, x_goal, y_goal
 	
+	#360 rotation to see Arucos
+	def rotate_360(self):
+		angular_speed = 0.3 #rad/s
+		twist = Twist()
+		twist.linear.x = 0.0
+		twist.angular.z = angular_speed
 
+		angle = 2*4 #360°
+		duration = angle/angular_speed
+		start_time = self.get_clock().now().seconds_nanoseconds()[0]
+		self.get_logger().info("Starting rotation")
+
+		while rclpy.ok():
+			current_time = self.get_clock().now().seconds_nanoseconds()[0]
+			if current_time-start_time >= duration:
+				break
+			self.publisher_360.publish(twist)
+			time.sleep(0.1)
+		
+		twist.angular.z = 0.0
+		self.publisher_360.publish(twist)
+		self.get_logger().info("Finished spinning, now going to goal !")
+
+	### Function to do the raycast
 	def one_ray_cast(self, r_pos_map, angle):
 
 		i_max = self.height
