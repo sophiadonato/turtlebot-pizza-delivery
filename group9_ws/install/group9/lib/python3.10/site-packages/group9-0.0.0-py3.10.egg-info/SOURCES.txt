@@ -10,6 +10,7 @@ setup.py
 ../../build/group9/group9.egg-info/zip-safe
 group9/KalmanFilter.py
 group9/__init__.py
+group9/aruco_subcription2.py
 group9/aruco_subscription.py
 resource/group9
 test/test_copyright.py

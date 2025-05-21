@@ -1,0 +1,5 @@
+  File "/home/laptop10/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/aruco_subscription.py", line 112
+    			self.make_transforms('Location',id,self.LocationVisit[id]))
+    			                                                          ^
+SyntaxError: unmatched ')'
+
