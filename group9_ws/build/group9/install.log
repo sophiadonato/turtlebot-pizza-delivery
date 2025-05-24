@@ -1,11 +1,13 @@
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/making_360.py
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/__init__.py
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/action.py
-/home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/map_subscriber.py
+/home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/map_explorer.py
+/home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/robot_pose.py
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/__pycache__/making_360.cpython-310.pyc
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/__pycache__/__init__.cpython-310.pyc
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/__pycache__/action.cpython-310.pyc
-/home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/__pycache__/map_subscriber.cpython-310.pyc
+/home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/__pycache__/map_explorer.cpython-310.pyc
+/home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/__pycache__/robot_pose.cpython-310.pyc
 /home/laptop08/group9/projet/group9_ws/install/group9/share/ament_index/resource_index/packages/group9
 /home/laptop08/group9/projet/group9_ws/install/group9/share/group9/package.xml
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info/entry_points.txt
@@ -17,4 +19,5 @@
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info/SOURCES.txt
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/group9/action
 /home/laptop08/group9/projet/group9_ws/install/group9/lib/group9/making_360
-/home/laptop08/group9/projet/group9_ws/install/group9/lib/group9/map_subscriber
+/home/laptop08/group9/projet/group9_ws/install/group9/lib/group9/map_explorer
+/home/laptop08/group9/projet/group9_ws/install/group9/lib/group9/robot_pose
