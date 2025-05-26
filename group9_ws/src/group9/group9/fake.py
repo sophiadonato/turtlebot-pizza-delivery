@@ -17,8 +17,8 @@ class Fake(Node):
         self.get_logger().info("Computing poses of arucos")
         Ap1 = PoseArray()
         p1 = Pose()
-        p1.position.x = 1.0
-        p1.position.y = 1.0
+        p1.position.x = 0.0
+        p1.position.y = 0.0
         p1.position.z = 0.0
         Ap1.poses.append(p1)
         p2 = Pose()

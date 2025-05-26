@@ -44,8 +44,8 @@ class PathOfDelivering(Node):
 
         # Publisher of ordered Arucos location
         self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
-        self.full_pose= [None] #init good?
-        self.pose_to_visit = np.array([]) #init good ? 
+        self.full_pose= []
+        self.pose_to_visit = []
 
         # Action client node to compute path to pose
         self.compute_path_node = ComputePathBetweenLocations()
