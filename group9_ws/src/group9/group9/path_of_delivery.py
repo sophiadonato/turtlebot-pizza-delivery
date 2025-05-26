@@ -175,6 +175,24 @@ class ComputePathBetweenLocations(Node):
         self.path = result.path.poses
         self.path_computed = True
 
+
+class Delivery(Node):
+    def __init__(self):
+        super().__init__('delivery') 
+
+        # Subscription to Arucos ID to visit (launched by PathOfDelivering)
+        self.subcription_arucos_to_visit = self.create_subscription(
+            PoseArray,
+            '/ordered_aruco_poses',
+            self.delivery_location_callback,
+            10)
+        self.subcription_arucos_to_visit
+
+        self.received_poses = False
+        self.poses_to_visit = []
+
+    def delivery_location_callback(self):
+        self.poses_to_visit
             
 def main(args=None):
     rclpy.init(args=args)
