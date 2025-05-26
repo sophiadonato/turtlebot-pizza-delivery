@@ -15,12 +15,23 @@ class PathOfDelivering(Node):
     def __init__(self):
         super().__init__('path_of_delivering') 
 
+        # Subscription to Robot pose
+        self.subscription_robot_pose = self.create_subscription(
+            PoseStamped,
+            '/robot_pose',
+            self.robot_pose_callback,
+            10)
+        self.subscription_robot_pose
+        self.robot_pose = None
+
+
         # Subscription to Arucos locations (why robot_location? ask Arnaud) 
         self.subscription_arucos_location = self.create_subscription(
             PoseArray,
-            'robot_location',
+            'arucos_location',
             self.full_location,
             10)
+        self.subscription_arucos_location
 
         # Subscription to Arucos ID to visit (launched by profs)
         self.subcription_IDs = self.create_subscription(
@@ -28,14 +39,8 @@ class PathOfDelivering(Node):
             'delivery_locations',
             self.get_IDs,
             10)
+        self.subcription_IDs
         
-        # Subscription to Robot pose
-        self.subscription_robot_pose = self.create_subscription(
-            PoseStamped,
-            '/robot_pose',
-            self.robot_pose_callback,
-            10)
-        self.robot_pose = None
 
         # Publisher of ordered Arucos location
         self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
@@ -47,14 +52,14 @@ class PathOfDelivering(Node):
 
     def full_location(self, msg):
         self.full_pose = msg.poses
-        self.destroy_subscription(self.subscription_location)
+        self.destroy_subscription(self.subscription_arucos_location)
 
     def robot_pose_callback(self, msg):
         self.robot_pose = msg.pose
         self.destroy_subscription(self.subscription_robot_pose)
     
     def get_IDs(self, msg):
-        if all(pose is not None for pose in self.full_pose):
+        if all(pose is not None for pose in self.full_pose) and self.robot_pose != None:
             self.id = msg.data
             self.nb_aruco_to_visit = len(self.id)
             for i in range(0,len(self.full_pose)):
@@ -67,6 +72,7 @@ class PathOfDelivering(Node):
         distance_matrix = np.zeros((self.nb_aruco_to_visit + 1,self.nb_aruco_to_visit + 1))
         robot_location = np.array(self.robot_pose)
         poses = np.append(robot_location,self.pose_to_visit)
+        self.get_logger().info(f'poses :{poses}')
         for i in range(0,self.nb_aruco_to_visit +1): 
             for j in range(i + 1, self.nb_aruco_to_visit + 1):
                 distance_matrix[i][j] = self.compute_estimated_distance(poses[i], poses[j]) #Check indexes
@@ -79,7 +85,7 @@ class PathOfDelivering(Node):
         permutation = permutation[1:] #The first element is always the current location of the Robot
         sequence = PoseArray()
         for nb in permutation:
-            sequence.poses.append(self.poseToVisit[nb -1])
+            sequence.poses.append(self.pose_to_visit[nb -1])
         self.publisher.publish(sequence)
     
     def compute_estimated_distance(self, start, end):
@@ -90,7 +96,8 @@ class PathOfDelivering(Node):
         self.get_logger().info(f'Compute path using Action Client node')
         self.compute_path_node.get_path()
         while self.compute_path_node.path_computed == False:
-            rclpy.spin_once(self.compute_path_node, timeout_sec = 0.1)
+            self.get_logger().info('In loop')
+            rclpy.spin_once(self.compute_path_node, timeout_sec = 3)
 
 
         distance = 0.0
@@ -114,7 +121,6 @@ class ComputePathBetweenLocations(Node):
         self.path_computed = False
     
     def get_path(self):
-        self.computing_distance = True
         self.get_logger().info(f'Start Pose: {self.start_pose.position.x}, {self.start_pose.position.y}, {self.start_pose.position.z}')
         self.get_logger().info(f'Goal Pose: {self.end_pose.position.x}, {self.end_pose.position.y}, {self.end_pose.position.z}')
 
@@ -138,11 +144,14 @@ class ComputePathBetweenLocations(Node):
 
         self.get_logger().info('Sending goal...')
         self._send_goal_future = self.action_client.send_goal_async(goal_msg)
+        self.get_logger().info('Goal has been send...')
+
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
+        self.get_logger().info('In response to sending goal callback ')
         goal_handle = future.result()
-        if not goal_handle.accepted():
+        if not goal_handle.accepted:
             self.get_logger().info('Goal rejected')
             return
         
@@ -155,6 +164,8 @@ class ComputePathBetweenLocations(Node):
         result = future.result().result
         if status != GoalStatus.STATUS_SUCCEEDED:
             self.get_logger().warn(f'Path planning failed with status code: {status}')
+            self.path = None
+            self.path_computed = True
             return None
 
         self.get_logger().info('Planning Done')
@@ -165,10 +176,8 @@ class ComputePathBetweenLocations(Node):
 def main(args=None):
     rclpy.init(args=args)
     deliver_node = PathOfDelivering()
-    compute_path_node = ComputePathBetweenLocations()
     rclpy.spin(deliver_node)
     deliver_node.destroy_node()
-    compute_path_node.destroy_node()
     rclpy.shutdown()
 	
 if __name__ == '__main__':

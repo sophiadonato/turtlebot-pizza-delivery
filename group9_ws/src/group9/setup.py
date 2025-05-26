@@ -22,6 +22,8 @@ setup(
         'console_scripts': [
         	'path= group9.PathOfDelivering:main',
             'fake = group9.fake:main',
+            'path_sol = group9.path_of_delivery_sol1:main',
+            'robot_pose = group9.robot_pose:main'
         ],
     },
 )
