@@ -9,16 +9,16 @@ class Fake(Node):
 
     def __init__(self):
         super().__init__('fake')  
-        self.publisher1 = self.create_publisher(PoseArray, 'arucos_location', 10)
-        self.publisher2 = self.create_publisher(Int32MultiArray, 'delivery_locations', 10)
+        self.publisher1 = self.create_publisher(PoseArray, '/arucos_location', 10)
+        self.publisher2 = self.create_publisher(Int32MultiArray, '/delivery_locations', 10)
         self.timer = self.create_timer(0.5, self.timer_callback)
     
     def timer_callback(self):
         self.get_logger().info("Computing poses of arucos")
         Ap1 = PoseArray()
         p1 = Pose()
-        p1.position.x = 0.0
-        p1.position.y = 0.0
+        p1.position.x = -1.0
+        p1.position.y = 1.0
         p1.position.z = 0.0
         Ap1.poses.append(p1)
         p2 = Pose()
@@ -37,7 +37,6 @@ class Fake(Node):
         v = Int32MultiArray()
         v.data.append(0)
         v.data.append(1)
-        v.data.append(2)
         self.publisher2.publish(v)
     
 

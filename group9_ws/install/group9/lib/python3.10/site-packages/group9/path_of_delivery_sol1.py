@@ -3,7 +3,7 @@ import numpy as np
 import math
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Pose, PoseArray,PoseStamped
+from geometry_msgs.msg import PoseArray,PoseStamped
 from std_msgs.msg import Int32MultiArray
 from python_tsp.exact import solve_tsp_dynamic_programming #pip install python-tsp
 from action_msgs.msg import GoalStatus
@@ -25,69 +25,80 @@ class PathOfDelivering(Node):
         self.robot_pose = None
 
 
-        # Subscription to Arucos locations (why robot_location? ask Arnaud) 
+        # Subscription to Arucos locations
         self.subscription_arucos_location = self.create_subscription(
             PoseArray,
-            'arucos_location',
-            self.full_location,
+            '/arucos_location',
+            self.arucos_location_callback,
             10)
         self.subscription_arucos_location
 
         # Subscription to Arucos ID to visit (launched by profs)
         self.subcription_IDs = self.create_subscription(
             Int32MultiArray,
-            'delivery_locations',
-            self.get_IDs,
+            '/delivery_locations',
+            self.delivery_location_callback,
             10)
         self.subcription_IDs
         
 
         # Publisher of ordered Arucos location
-        self.publisher = self.create_publisher(PoseArray, 'ordered_poses', 10)
-        self.full_pose= [None] #init good?
-        self.pose_to_visit = np.array([]) #init good ? 
+        self.publisher = self.create_publisher(PoseArray, '/ordered_aruco_poses', 10)
+        self.arucos_pose = []
+        self.arucos_to_visit = []
 
         # Action client node to compute path to pose
         self.compute_path_node = ComputePathBetweenLocations()
 
-    def full_location(self, msg):
-        self.full_pose = msg.poses
+    # Sets arucos pose
+    def arucos_location_callback(self, msg):
+        self.arucos_pose = msg.poses
         self.destroy_subscription(self.subscription_arucos_location)
 
+    # Gets current robot location (isn't supposed to move in that part)
     def robot_pose_callback(self, msg):
         self.robot_pose = msg.pose
         self.destroy_subscription(self.subscription_robot_pose)
     
-    def get_IDs(self, msg):
-        if all(pose is not None for pose in self.full_pose) and self.robot_pose != None:
-            self.id = msg.data
-            self.nb_aruco_to_visit = len(self.id)
-            for i in range(0,len(self.full_pose)):
-                if i in self.id:
-                    self.pose_to_visit = np.append(self.pose_to_visit,np.array([self.full_pose[i]]))
+    # Gets arucos pose to visit
+    def delivery_location_callback(self, msg):
+        if all(pose is not None for pose in self.arucos_pose) and self.robot_pose != None:
+            ids = msg.data
+            self.nb_aruco_to_visit = len(ids)
+            for i in ids:
+                self.arucos_to_visit = np.append(self.arucos_to_visit,np.array([self.arucos_pose[i]]))
             self.destroy_subscription(self.subcription_IDs)
             self.computation()
     
+    # Solves TSP problem, orders arucos position with respect to solution of TSP, published ordered positions
     def computation(self):
         distance_matrix = np.zeros((self.nb_aruco_to_visit + 1,self.nb_aruco_to_visit + 1))
         robot_location = np.array(self.robot_pose)
-        poses = np.append(robot_location,self.pose_to_visit)
-        self.get_logger().info(f'poses :{poses}')
+        poses = np.append(robot_location , self.arucos_to_visit)
+
         for i in range(0,self.nb_aruco_to_visit +1): 
             for j in range(i + 1, self.nb_aruco_to_visit + 1):
-                distance_matrix[i][j] = self.compute_estimated_distance(poses[i], poses[j]) #Check indexes
-                distance_matrix[i][j] = i*j*2.5
+                distance_matrix[i][j] = self.compute_estimated_distance(poses[i], poses[j])
                 distance_matrix[j][i] = distance_matrix[i][j]
-        distance_matrix[:,0] = 0
-        self.get_logger().info(f'Computing delibery order using TSP')
+
+        distance_matrix[:,0] = 0 #why???
+        self.get_logger().info(f'Computing delivery order using TSP')
         permutation,_ = solve_tsp_dynamic_programming(distance_matrix)
-        self.get_logger().info(f'{permutation}')
+        self.get_logger().info(f'Permutation : {permutation}')
         permutation = permutation[1:] #The first element is always the current location of the Robot
         sequence = PoseArray()
+        sequence.header.frame_id = 'map'
         for nb in permutation:
-            sequence.poses.append(self.pose_to_visit[nb -1])
+            sequence.poses.append(self.arucos_to_visit[nb -1])
+
         self.publisher.publish(sequence)
+        self.get_logger().info(f'plushied seq of poses : {sequence}')
+        
+        rclpy.shutdown()
+
     
+    # Computes the estimated distance between 2 poses, 
+    # Using nav2 Action client that computes a path of poses between start and end and computing an estimated distance between each pose of the path
     def compute_estimated_distance(self, start, end):
         self.compute_path_node.start_pose = start
         self.compute_path_node.end_pose = end
@@ -96,21 +107,20 @@ class PathOfDelivering(Node):
         self.get_logger().info(f'Compute path using Action Client node')
         self.compute_path_node.get_path()
         while self.compute_path_node.path_computed == False:
-            self.get_logger().info('In loop')
             rclpy.spin_once(self.compute_path_node, timeout_sec = 3)
 
 
         distance = 0.0
-        self.get_logger().info(f'Compute estimated distance')
         for i in range(1, len(self.compute_path_node.path)):
             x0 = self.compute_path_node.path[i - 1].pose.position.x
             y0 = self.compute_path_node.path[i - 1].pose.position.y
             x1 = self.compute_path_node.path[i].pose.position.x
             y1 = self.compute_path_node.path[i].pose.position.y
             distance += math.hypot(x1 - x0, y1 - y0)
-        self.get_logger().info(f'distance computed')
+        self.get_logger().info(f'Estimated distance : {distance}')
         return distance
     
+
 class ComputePathBetweenLocations(Node):
     def __init__(self):
         super().__init__('compute_path_btw_locations')
@@ -118,7 +128,7 @@ class ComputePathBetweenLocations(Node):
         self.start_pose = None
         self.end_pose = None
         self.path = None
-        self.path_computed = False
+        self.path_computed = False #Flag 
     
     def get_path(self):
         self.get_logger().info(f'Start Pose: {self.start_pose.position.x}, {self.start_pose.position.y}, {self.start_pose.position.z}')
@@ -130,26 +140,23 @@ class ComputePathBetweenLocations(Node):
         goal_msg = ComputePathToPose.Goal()
 
         startPoseStamped = PoseStamped()
-        startPoseStamped.pose.position.x = self.start_pose.position.x
-        startPoseStamped.pose.position.y = self.start_pose.position.y
-        startPoseStamped.pose.position.z = self.start_pose.position.z
-
+        startPoseStamped.header.frame_id = "map"
+        startPoseStamped.header.stamp = self.get_clock().now().to_msg()
+        startPoseStamped.pose = self.start_pose
         goalPoseStamped = PoseStamped()
-        goalPoseStamped.pose.position.x = self.end_pose.position.x
-        goalPoseStamped.pose.position.y = self.end_pose.position.y
-        goalPoseStamped.pose.position.z = self.end_pose.position.z
+        goalPoseStamped.header.frame_id = "map"
+        goalPoseStamped.header.stamp = self.get_clock().now().to_msg()
+        goalPoseStamped.pose = self.end_pose
 
         goal_msg.start = startPoseStamped
         goal_msg.goal = goalPoseStamped
 
         self.get_logger().info('Sending goal...')
         self._send_goal_future = self.action_client.send_goal_async(goal_msg)
-        self.get_logger().info('Goal has been send...')
 
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
-        self.get_logger().info('In response callback ')
         goal_handle = future.result()
         if not goal_handle.accepted:
             self.get_logger().info('Goal rejected')
@@ -164,12 +171,10 @@ class ComputePathBetweenLocations(Node):
         result = future.result().result
         if status != GoalStatus.STATUS_SUCCEEDED:
             self.get_logger().warn(f'Path planning failed with status code: {status}')
-            self.path = None
-            self.path_computed = True
             return None
 
         self.get_logger().info('Planning Done')
-        self.path = result.result.path.poses
+        self.path = result.path.poses
         self.path_computed = True
 
             
@@ -177,8 +182,6 @@ def main(args=None):
     rclpy.init(args=args)
     deliver_node = PathOfDelivering()
     rclpy.spin(deliver_node)
-    deliver_node.destroy_node()
-    rclpy.shutdown()
 	
 if __name__ == '__main__':
 	main()
