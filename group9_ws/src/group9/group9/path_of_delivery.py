@@ -7,7 +7,7 @@ from geometry_msgs.msg import PoseArray,PoseStamped
 from std_msgs.msg import Int32MultiArray
 from python_tsp.exact import solve_tsp_dynamic_programming #pip install python-tsp
 from action_msgs.msg import GoalStatus
-from nav2_msgs.action import ComputePathToPose
+from nav2_msgs.action import ComputePathToPose, NavigateToPose
 from rclpy.action import ActionClient
 
 class PathOfDelivering(Node):
@@ -188,11 +188,67 @@ class Delivery(Node):
             10)
         self.subcription_arucos_to_visit
 
-        self.received_poses = False
-        self.poses_to_visit = []
+        # Deliver pizza every 1 sec
+        self.pizza_delivery = self.create_timer(1, self.pizza_delivery_callback)
+        self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
 
-    def delivery_location_callback(self):
-        self.poses_to_visit
+        self.received_poses = False # Delivery after receing pose
+        self.sent_goal = False # One goal at a time
+        self.client_idx = 0 # Idx of pizza to deliver
+        self.nb_clients = 0
+
+    def delivery_location_callback(self, msg):
+        self.poses_to_visit = msg.poses  #Pose[]
+        self.nb_clients = len(self.poses_to_visit)
+        self.received_poses = True
+        self.destroy_subsription(self.subcription_arucos_to_visit)
+    
+    def pizza_delivery_callback(self):
+        if not self.received_poses:
+            return
+        if self.sent_goal == False and self.client_idx < self.nb_clients:
+            self.sent_goal = True
+            self.get_logger().info('Sending goal to the robot')
+            self.send_goal(self.poses_to_visit[self.client_idx])
+
+        if self.client_idx >= self.nb_clients :
+            self.get_logger().info('Delivery finished !')
+
+        return
+
+    def send_goal(self, pose):
+        self.get_logger().info('Waiting for action server..')
+        self._action_client.wait_for_server()
+        goal_msg = NavigateToPose.Goal()
+        goal_msg = PoseStamped()
+        goal_msg.pose.header.frame_id = "map"
+        goal_msg.header.stamp = self.get_clock().now().to_msg()
+        goal_msg.pose.pose = pose 
+        goal_msg.behavior_tree = ""
+
+        self.get_logger().info('Sending goal request..')
+        self._send_goal_future = self._action_client.send_goal_async(goal_msg)
+        self._send_goal_future.add_done_callback(self.goal_response_callback)
+
+    def goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted :
+            self.get_logger().info('Goal rejected')
+            return
+        self.get_logger().info('Goal accepted')
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.get_result_callback)
+    
+    def get_result_callback(self, future):
+        result = future.result().result
+        status = future.result().status
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info('Goal succedeed !')
+            self.client_idx +=1
+        else:
+            self.get_logger().info('Goal failed')
+        
+        self.sent_goal  = False
             
 def main(args=None):
     rclpy.init(args=args)
