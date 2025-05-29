@@ -12,6 +12,7 @@ from nav2_msgs.action import NavigateToPose
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist
 from action_msgs.msg import GoalStatus
+from std_msgs.msg import Float32MultiArray
 
 class MapExplorer(Node):
 
@@ -36,6 +37,8 @@ class MapExplorer(Node):
 		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose') #Nav2 Action Client
 		self.sent_goal = False #True when robot is processing the goal
 		self.explored_map = False #true when explo phase is finished
+		self.visited_poses = [] 
+		
 
 		# Robot position
 		self.x_robot = 0 
@@ -56,6 +59,14 @@ class MapExplorer(Node):
 		)
 		self.publisher_360
 
+		# Publisher for the array of pose visited + 360
+		self.publisher_pose = self.create_publisher(
+			Float32MultiArray, 
+			'/pos_array',
+			10
+		)
+		self.publisher_pose
+
 	# Process the map
 	def map_processing_callback(self, grid):
 		self.grid_matrix = self.load_grid(grid)
@@ -72,6 +83,7 @@ class MapExplorer(Node):
 			if go_to_goal :
 				self.get_logger().info(f" x goal : {x_goal}, y goal : {y_goal}")
 				self.rotate_360() 
+				self.visited_poses.append([self.x_robot, self.y_robot])
 				self.send_goal(x_goal, y_goal)
 		return
 	
@@ -287,6 +299,10 @@ class MapExplorer(Node):
 		if len(frontiers) <= 0 :
 			self.explored_map = True
 			self.get_logger().info(f'Finished map')
+			flat_array = self.visited_poses.flatten()
+			msg = Float32MultiArray()
+			msg.data = flat_array.tolist()
+			self.publisher_pose.publish(msg)
 			return False, 0, 0
 
 		# Finding middle of frontiers
@@ -310,7 +326,7 @@ class MapExplorer(Node):
 		# Finding closest goal
 		min_dist = np.inf
 		for x, y in frontier_middles_coord :
-			if np.sqrt((x-self.x_robot)**2 + (y-self.x_robot)**2) < min_dist:
+			if np.sqrt((x-self.x_robot)**2 + (y-self.y_robot)**2) < min_dist:
 				min_dist = np.sqrt((x-self.x_robot)**2 + (y-self.y_robot)**2)
 				x_goal = x
 				y_goal = y
