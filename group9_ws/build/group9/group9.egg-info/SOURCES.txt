@@ -10,8 +10,11 @@ setup.py
 ../../build/group9/group9.egg-info/zip-safe
 group9/__init__.py
 group9/action.py
+group9/end_exploration.py
+group9/fake.py
 group9/making_360.py
 group9/map_explorer.py
+group9/raycasting.py
 group9/robot_pose.py
 resource/group9
 test/test_copyright.py

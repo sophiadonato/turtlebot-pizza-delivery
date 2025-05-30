@@ -1,6 +1,6 @@
 [console_scripts]
-action = group9.action:main
-making_360 = group9.making_360:main
+fake = group9.fake:main
 map_explorer = group9.map_explorer:main
+raycaster = group9.raycasting:main
 robot_pose = group9.robot_pose:main
 

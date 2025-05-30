@@ -20,10 +20,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-        	'action = group9.action:main',
         	'map_explorer = group9.map_explorer:main',
-            'making_360 = group9.making_360:main',
-            'robot_pose = group9.robot_pose:main'
+            'raycaster = group9.raycasting:main',
+            'robot_pose = group9.robot_pose:main',
+            'fake = group9.fake:main'
         ],
     },
 )

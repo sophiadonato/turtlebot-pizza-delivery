@@ -30,8 +30,8 @@ class MapExplorer(Node):
 		# Subscription to Robot pose
 		self.robot_pose = self.create_subscription(PoseStamped, '/robot_pose', self.robot_pose_callback, 10)
 
-		# Discovering the map every 10sec
-		self.map_discovery = self.create_timer(10, self.map_discovery_callback)
+		# Discovering the map every 3sec
+		self.map_discovery = self.create_timer(3, self.map_discovery_callback)
 		
 		self.grid_matrix = np.zeros((2000, 2000), dtype = float) #Processed map
 		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose') #Nav2 Action Client
@@ -299,9 +299,10 @@ class MapExplorer(Node):
 		if len(frontiers) <= 0 :
 			self.explored_map = True
 			self.get_logger().info(f'Finished map')
-			flat_array = self.visited_poses.flatten()
+
+			# Publishing poses where robot did 360 to raycast if missing arucos
 			msg = Float32MultiArray()
-			msg.data = flat_array.tolist()
+			msg.data = [coord for pose in self.visited_poses for coord in pose]
 			self.publisher_pose.publish(msg)
 			return False, 0, 0
 
@@ -356,101 +357,6 @@ class MapExplorer(Node):
 		self.publisher_360.publish(twist)
 		self.get_logger().info("Finished spinning, now going to goal !")
 
-	### Function to do the raycast
-	def one_ray_cast(self, r_pos_map, angle):
-
-		i_max = self.height
-		j_max = self.width
-
-		rd = [np.cos(angle), np.sin(angle)]
-		
-		step = np.sign(rd)
-
-		
-		theta = self.angle_to_quaternion(self.q[0], self.q[1], self.q[2], self.q[3])
-		dx = r_pos_map[0] - self.p[0]
-		dy = r_pos_map[1] - self.p[1]
-
-		x_loc = dx * np.cos(theta) + dy * np.sin(theta)
-		y_loc = dy * np.cos(theta) - dx * np.sin(theta)
-
-		j_float = x_loc / self.occ_res - 0.5
-		i_float = y_loc / self.occ_res - 0.5
-		j = math.floor(j_float)
-		i = math.floor(i_float)
-
-		x_test, y_test = self.index_to_real_world(i, j)
-
-		self.get_logger().info(f'i = {i}')
-		self.get_logger().info(f'j = {j}')
-		self.get_logger().info(f'x_robot = {r_pos_map[0]}')
-		self.get_logger().info(f'y_robot = {r_pos_map[1]}')
-
-		self.get_logger().info(f'x_test = {x_test}')
-		self.get_logger().info(f'y_test = {y_test}')
-		frac = [j_float - j, i_float - i] 
-
-		unit_step = [np.sqrt(1 + (rd[1]/rd[0])**2)if rd[0] != 0 else float('inf'),np.sqrt(1 + (rd[0]/rd[1])**2)if rd[1] != 0 else float('inf') ]
-		#unit_step = [ abs(1 / rd[0]) if rd[0] != 0 else float('inf'),abs(1 / rd[1]) if rd[1] != 0 else float('inf')]
-
-
-		ray_length = np.zeros(2)
-		if (rd[0] < 0):
-			ray_length[0] = frac[0] * unit_step[0]
-		else:
-			ray_length[0] = (1 - frac[0]) * unit_step[0]
-
-		if (rd[1] < 0):
-			ray_length[1] = frac[1] * unit_step[1]
-		else:
-			ray_length[1] = (1 - frac[1]) * unit_step[1]
-
-		true_xlen = ray_length[0] * self.occ_res
-		true_ylen = ray_length[1] * self.occ_res
-		true_length = np.sqrt(true_xlen**2 + true_ylen ** 2)
-
-		i_prev = i
-		j_prev = j
-
-		self.get_logger().info(f'true_length = {true_length}')
-
-		while true_length < 2:
-			if i < 0 or j < 0 or i >= i_max - 1 or j >= j_max- 1:
-				return False, None, None
-			
-			
-			if self.grid_matrix[i,j] == 1.0:
-				return True, i_prev, j_prev
-			
-			else: 
-				i_prev = i
-				j_prev = j
-				if (ray_length[0] < ray_length[1]):
-					j = int( j + step[0])
-					ray_length[0] += unit_step[0]
-				
-				else:       
-					i = int(i + step[1])
-					ray_length[1] += unit_step[1]
-			true_xlen = ray_length[0] * self.occ_res
-			true_ylen = ray_length[1] * self.occ_res
-			true_length = np.sqrt(true_xlen**2 + true_ylen ** 2)
-
-		return False, 0, 0
-
-	def raycast_360(self, n_rays=300):
-		r_pos_map = [self.x_robot, self.y_robot]
-		for n in range(n_rays):
-			if n==0:
-				continue
-			self.get_logger().info(f'n = {n}')
-			angle = n * 2 * np.pi / n_rays
-			hit, i, j = self.one_ray_cast(r_pos_map, angle)
-			if hit:
-				self.get_logger().info(f'i = {i}')
-				self.get_logger().info(f'j = {j}')
-
-				self.grid_matrix[i,j] = 2.0 #à voir ce qu'on veut faire avec
 
 def main(args=None):
 	rclpy.init(args=args)

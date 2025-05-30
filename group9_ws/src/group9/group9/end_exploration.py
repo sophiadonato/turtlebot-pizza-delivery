@@ -33,10 +33,11 @@ class LastArucos(Node):
 		self.grid_loaded = False
 		
 		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
-		#Subscription to the number of aruco, see with arnaud (maybe list of arucos laready found and calculate de length)
+
+		#Subscription to the number of aruco, see with arnaud (maybe list of arucos already found and calculate de length)
 		self.nbr_arucos_subscriber = self.create_subscription(
             Int32, 
-            'aruco_number', 
+            '/aruco_number', 
             self.load_aruco,
             10)
 		self.nbr_arucos_subscriber
@@ -55,7 +56,7 @@ class LastArucos(Node):
 		self.height = 0
 		
 		self.sent_goal = False #True when robot is processing the goal
-		self.explored_map = False #true when explo phase is finished
+		self.explored_map = False #True when explo phase is finished
 		
 	#To load the grid one time
 	def map_processing_callback(self, grid):
@@ -82,7 +83,7 @@ class LastArucos(Node):
 			for i in range(self.pos_array.shape[0]):
 				self.raycast_360(self.pos_array[i])
 				
-			self.map_discovery = self.create_timer(10, self.map_discovery_callback)
+			self.map_discovery = self.create_timer(3, self.map_discovery_callback)
 			return
 			
 		else:
