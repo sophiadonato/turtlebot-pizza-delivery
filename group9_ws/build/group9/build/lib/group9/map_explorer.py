@@ -59,6 +59,10 @@ class MapExplorer(Node):
 	# Process the map
 	def map_processing_callback(self, grid):
 		self.grid_matrix = self.load_grid(grid)
+		plt.imshow(self.grid_matrix, cmap="viridis")
+		plt.colorbar()
+		plt.savefig("src/group9/map.pdf", dpi=300, bbox_inches='tight')
+		plt.close()
 
 	# Discover map
 	def map_discovery_callback(self):
