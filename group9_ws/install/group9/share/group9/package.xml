@@ -17,7 +17,7 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>action_msgs</exec_depend>
   <exec_depend>time</exec_depend>
-  
+  <exec_depend>python_tsp</exec_depend>
   
 
   <export>

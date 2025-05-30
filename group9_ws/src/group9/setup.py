@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
         	'map_explorer = group9.map_explorer:main',
             'robot_pose = group9.robot_pose:main',
-            'delivery = group9.delivery:main'
+            'delivery = group9.delivery:main',
+            'fake = group9.fake:main'
         ],
     },
 )
