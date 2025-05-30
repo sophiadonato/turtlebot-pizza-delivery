@@ -10,6 +10,7 @@ setup.py
 ../../build/group9/group9.egg-info/zip-safe
 group9/__init__.py
 group9/action.py
+group9/aruco_subscription.py
 group9/delivery.py
 group9/delivery_v1.py
 group9/fake.py

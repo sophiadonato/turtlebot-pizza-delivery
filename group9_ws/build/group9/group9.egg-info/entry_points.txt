@@ -1,4 +1,5 @@
 [console_scripts]
+aruco_subscriber = group9.aruco_subscription:main
 delivery = group9.delivery:main
 fake = group9.fake:main
 map_explorer = group9.map_explorer:main
