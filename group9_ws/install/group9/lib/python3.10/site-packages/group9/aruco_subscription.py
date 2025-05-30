@@ -2,11 +2,13 @@ import numpy as np
 import math
 import rclpy
 from scipy.spatial.transform import Rotation as R
+
 from rclpy.node import Node
-from ros2_aruco_interfaces.msg import ArucoMarkers #TBC
+from ros2_aruco_interfaces.msg import ArucoMarkers
 from tf2_ros.transform_listener import TransformListener
 from tf2_ros.buffer import Buffer
 from geometry_msgs.msg import Pose, PoseArray,TransformStamped
+from std_msgs.msg import Int32
 from tf2_geometry_msgs import do_transform_pose
 from tf2_ros import TransformException
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
@@ -76,7 +78,7 @@ class ArucoSubscriber(Node):
 		self.tf_buffer = Buffer()
 		self.listener = TransformListener(self.tf_buffer, self)
 		nbArucos = 10
-		self.publisher1 = self.create_publisher(PoseArray, 'arucos_location', 10)
+		self.publisherNumber = self.create_publisher(Int32, '/arucos_number', 10)
 		self.publisher2 = self.create_publisher(PoseArray, 'robot_location', 10)
 		self.ArucoLocations = [None]*nbArucos  #How many arucos do we have to consider?
 		self.LocationVisit = [None]*nbArucos
@@ -93,7 +95,7 @@ class ArucoSubscriber(Node):
 			self.get_logger().info(f'Aruco information : ID : {id}')
 			if id > 10:
 				self.get_logger().info(f'This aruco cannot be found on the map and is discarded')
-				return
+				break
 			
 			pose = arucoMarkers.poses[i]
 			try:
@@ -113,6 +115,11 @@ class ArucoSubscriber(Node):
 			self.make_transforms('Aruco',id,self.ArucoLocations[id])
 			self.make_transforms('Location',id,self.LocationVisit[id])
 			self.aruco_locations_publisher()
+		msg = Int32()
+		msg.data = sum(1 for item in self.LocationVisit if item is not None)
+		self.get_logger().info(f'Number of arucos already found {msg.data}')
+		self.publisherNumber.publish(msg)
+
    
 		# if all(pose is not None for pose in self.ArucoLocations):
 		# 	self.get_logger().info('All arucos have been visited')
@@ -129,8 +136,8 @@ class ArucoSubscriber(Node):
 			if pose is not None:
 				locationArucos.poses.append(pose)
 				#robotToVisit.poses.append(PoseToVisitForGivenAruco(pose))
-		self.publisher1.publish(locationArucos)
-		self.publisher2.publish(robotToVisit)
+		#self.publisher1.publish(locationArucos)
+		#self.publisher2.publish(robotToVisit)
 	
 	def make_transforms(self,Name, ID, ArucoPose):
 		t = TransformStamped()
