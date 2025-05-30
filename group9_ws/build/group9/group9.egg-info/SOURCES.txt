@@ -17,6 +17,7 @@ group9/fake.py
 group9/making_360.py
 group9/map_explorer.py
 group9/robot_pose.py
+launch/group9.launch.py
 resource/group9
 test/test_copyright.py
 test/test_flake8.py
