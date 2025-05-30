@@ -79,9 +79,10 @@ class ArucoSubscriber(Node):
 		self.listener = TransformListener(self.tf_buffer, self)
 		nbArucos = 10
 		self.publisherNumber = self.create_publisher(Int32, '/arucos_number', 10)
-		self.publisher2 = self.create_publisher(PoseArray, 'robot_location', 10)
-		self.ArucoLocations = [None]*nbArucos  #How many arucos do we have to consider?
+		self.publisher = self.create_publisher(PoseArray, '/robot_pose', 10)
+		self.ArucoLocations = [None]*nbArucos
 		self.LocationVisit = [None]*nbArucos
+		self.nbVisits = np.zeros(nbArucos)
 
 		#We implement a Kalman filter to get rid of camera noise
 		self.filtersAruco = {}
@@ -108,9 +109,10 @@ class ArucoSubscriber(Node):
 			if id not in self.filtersAruco:
 				self.filtersAruco[id] = KalmanFilter()
 				
-			self.filtersAruco[id].updateWithPose(pose) #KF on the global aruco location
+			self.filtersAruco[id].updateWithPose(pose)
 
 			self.ArucoLocations[id] = self.filtersAruco[id].get_estimate()
+			self.nbVisits[id] += 1
 			self.LocationVisit[id] = self.robotLocation(self.ArucoLocations[id])
 			self.make_transforms('Aruco',id,self.ArucoLocations[id])
 			self.make_transforms('Location',id,self.LocationVisit[id])
@@ -119,25 +121,20 @@ class ArucoSubscriber(Node):
 		msg.data = sum(1 for item in self.LocationVisit if item is not None)
 		self.get_logger().info(f'Number of arucos already found {msg.data}')
 		self.publisherNumber.publish(msg)
-
-   
-		# if all(pose is not None for pose in self.ArucoLocations):
-		# 	self.get_logger().info('All arucos have been visited')
-		# 	self.aruco_locations_publisher()
-		# 	self.destroy_node()
-		# 	rclpy.shutdown()
+		
+		if all(value > 5 for value in self.nbVisits):
+			self.get_logger().info('All arucos have been visited')
+			self.aruco_locations_publisher()
+			self.destroy_node()
+			rclpy.shutdown()
 
 	def aruco_locations_publisher(self):
-		locationArucos = PoseArray()
-		locationArucos.header.frame_id = "Poses where the arucos are located"
 		robotToVisit = PoseArray()
 		robotToVisit.header.frame_id = "Poses where the robot should go to visit the aruco"
-		for pose in self.ArucoLocations:
+		for pose in self.LocationVisit:
 			if pose is not None:
-				locationArucos.poses.append(pose)
-				#robotToVisit.poses.append(PoseToVisitForGivenAruco(pose))
-		#self.publisher1.publish(locationArucos)
-		#self.publisher2.publish(robotToVisit)
+				robotToVisit.poses.append(pose)
+		self.publisher.publish(robotToVisit)
 	
 	def make_transforms(self,Name, ID, ArucoPose):
 		t = TransformStamped()
@@ -181,7 +178,7 @@ def main(args=None):
 	rclpy.init(args=args)
 	aruco_subscriber = ArucoSubscriber()
 	rclpy.spin(aruco_subscriber)
-	aruco_subscriber.destroy_node() #Check that it's needed or not if node is destroyed in aruco_callback
+	aruco_subscriber.destroy_node()
 	rclpy.shutdown()
 	
 if __name__ == '__main__':
