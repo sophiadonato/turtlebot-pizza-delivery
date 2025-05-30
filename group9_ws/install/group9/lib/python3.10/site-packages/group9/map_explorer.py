@@ -18,6 +18,7 @@ class MapExplorer(Node):
 
 	def __init__(self):
 		super().__init__('map_explorer')
+		self.printOcc = True
 
 		# Subscription to Occupancy map
 		self.map_processing = self.create_subscription(
@@ -163,6 +164,10 @@ class MapExplorer(Node):
 		self.occ_res = grid.info.resolution
 		data = grid.data
 		data = np.reshape(data, (self.height, self.width))
+
+		data2 = np.copy(data)
+
+
 		wall_mask  = (data > 60)
 		no_mask = (data < 30) & (data > 0)
 		unknown = (data >= 30) & (data <= 60)
@@ -198,6 +203,16 @@ class MapExplorer(Node):
 							completed_mask[i,j] = True                  
 
 		data[completed_mask] = 1
+		if self.printOcc == True:
+			plt.imshow(data2,cmap="viridis")
+			plt.colorbar()
+			plt.savefig("src/group9/grid_before.pdf", dpi=300, bbox_inches='tight')
+			plt.close()
+			plt.imshow(data,cmap="viridis")
+			plt.colorbar()
+			plt.savefig("src/group9/grid_after.pdf", dpi=300, bbox_inches='tight')
+			plt.close()
+			self.printOcc = False
 		return data
 	
 
