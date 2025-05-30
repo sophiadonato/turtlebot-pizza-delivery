@@ -20,9 +20,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-        	'path_v1 = group9.path_of_delivery_v1:main',
+        	'delivery-v1 = group9.delivery_v1:main',
             'fake = group9.fake:main',
-            'path = group9.path_of_delivery:main',
+            'delivery = group9.delivery:main',
             'robot_pose = group9.robot_pose:main'
         ],
     },

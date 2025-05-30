@@ -10,10 +10,10 @@ from action_msgs.msg import GoalStatus
 from nav2_msgs.action import ComputePathToPose, NavigateToPose
 from rclpy.action import ActionClient
 
-class PathOfDelivering(Node):
+class PathOfDelivery(Node):
 
     def __init__(self):
-        super().__init__('path_of_delivering') 
+        super().__init__('path_of_delivery') 
 
         # Subscription to Robot pose
         self.subscription_robot_pose = self.create_subscription(
@@ -252,8 +252,10 @@ class Delivery(Node):
             
 def main(args=None):
     rclpy.init(args=args)
-    deliver_node = PathOfDelivering()
-    rclpy.spin(deliver_node)
+    path_computer_node = PathOfDelivery()
+    delivery_node = Delivery()
+    rclpy.spin(path_computer_node)
+    rclpy.spin(delivery_node)
 	
 if __name__ == '__main__':
 	main()
