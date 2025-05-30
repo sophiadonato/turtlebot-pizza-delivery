@@ -1,5 +1,7 @@
 import numpy as np
+import math
 import rclpy
+from scipy.spatial.transform import Rotation as R
 from rclpy.node import Node
 from ros2_aruco_interfaces.msg import ArucoMarkers #TBC
 from tf2_ros.transform_listener import TransformListener
@@ -81,7 +83,6 @@ class ArucoSubscriber(Node):
 
 		#We implement a Kalman filter to get rid of camera noise
 		self.filtersAruco = {}
-		self.filtersLocations = {}
 		
 		#Broadcaster
 		self.tf_static_broadcaster = StaticTransformBroadcaster(self)
@@ -90,24 +91,25 @@ class ArucoSubscriber(Node):
 		for i in range(0, len(arucoMarkers.marker_ids)):
 			id = arucoMarkers.marker_ids[i]
 			self.get_logger().info(f'Aruco information : ID : {id}')
+			if id > 10:
+				self.get_logger().info(f'This aruco cannot be found on the map and is discarded')
+				return
+			
 			pose = arucoMarkers.poses[i]
-			poseVisit = self.PoseToVisitForGivenAruco(pose)
 			try:
 				t = self.tf_buffer.lookup_transform('map','camera_optical_joint',rclpy.time.Time())
 			except TransformException as ex:
 				self.get_logger().info(f'Could not transform map to camera_optical_joint: {ex}')
 				return
-			poseVisit = do_transform_pose(poseVisit,t)
+			
 			pose = do_transform_pose(pose,t)
 			if id not in self.filtersAruco:
 				self.filtersAruco[id] = KalmanFilter()
-				self.filtersLocations[id] = KalmanFilter()
 				
 			self.filtersAruco[id].updateWithPose(pose) #KF on the global aruco location
-			self.filtersLocations[id].updateWithPose(poseVisit)
 
 			self.ArucoLocations[id] = self.filtersAruco[id].get_estimate()
-			self.LocationVisit[id] = self.filtersLocations[id].get_estimate()
+			self.LocationVisit[id] = self.robotLocation(self.ArucoLocations[id])
 			self.make_transforms('Aruco',id,self.ArucoLocations[id])
 			self.make_transforms('Location',id,self.LocationVisit[id])
 			self.aruco_locations_publisher()
@@ -119,8 +121,6 @@ class ArucoSubscriber(Node):
 		# 	rclpy.shutdown()
 
 	def aruco_locations_publisher(self):
-		#Do we need to publish other informations?
-		#See aruco_node to see how it's done (Using ArrayPose())
 		locationArucos = PoseArray()
 		locationArucos.header.frame_id = "Poses where the arucos are located"
 		robotToVisit = PoseArray()
@@ -135,14 +135,8 @@ class ArucoSubscriber(Node):
 	def make_transforms(self,Name, ID, ArucoPose):
 		t = TransformStamped()
 		t.header.stamp = self.get_clock().now().to_msg()
-		# if Name == 'Aruco':
 		t.header.frame_id = 'map'
 		t.child_frame_id = Name + str(ID)
-		# else:
-		# 	t.header.frame_id = 'Aruco' + str(ID)
-		# 	t.child_frame_id = Name + str(ID)
-
-
 		t.transform.translation.x = float(ArucoPose.position.x)
 		t.transform.translation.y = float(ArucoPose.position.y)
 		t.transform.translation.z = float(ArucoPose.position.z)
@@ -153,24 +147,28 @@ class ArucoSubscriber(Node):
 		t.transform.rotation.w = float(ArucoPose.orientation.w)
 		self.tf_static_broadcaster.sendTransform(t)
 
-	def PoseToVisitForGivenAruco(self,ArucoPose):
-		t1 = TransformStamped()
-		t1.transform.translation.z = -0.5
-		ArucoPose = do_transform_pose(ArucoPose,t1)
-  
-		t2 = TransformStamped()
-		# Rotation of 90° around y (green)
-		t2.transform.rotation.y = -0.707
-		t2.transform.rotation.w = 0.707 
-		ArucoPose = do_transform_pose(ArucoPose,t2)
+	def robotLocation(self,ArucoPose):
+		robotPose = Pose()
+		yaw = quaternion_to_yaw(ArucoPose.orientation.x,ArucoPose.orientation.y,ArucoPose.orientation.z, ArucoPose.orientation.w) 
+		robotPose.position.x = ArucoPose.position.x + 0.5*math.sin(yaw)
+		robotPose.position.y = ArucoPose.position.y - 0.5*math.cos(yaw)
+		robotPose.position.z = ArucoPose.position.z
+		original_q = R.from_quat([ArucoPose.orientation.x,
+                          ArucoPose.orientation.y,
+                          ArucoPose.orientation.z,
+                          ArucoPose.orientation.w])
+		rot_z_90 = R.from_euler('z', 90, degrees=True)
+		rot_y_90 = R.from_euler('y', 90, degrees=True)
+		composite_rotation = rot_z_90*rot_y_90
+		rotated_q = original_q*composite_rotation
+		robotPose.orientation.x,robotPose.orientation.y, robotPose.orientation.z,robotPose.orientation.w = rotated_q.as_quat()
+		return robotPose
+	
 
-		t3 = TransformStamped()
-		# Rotation of 90° around x (red)
-		t3.transform.rotation.x = -0.707
-		t3.transform.rotation.w = 0.707 
-		ArucoPose = do_transform_pose(ArucoPose,t3)
-
-		return ArucoPose
+def quaternion_to_yaw(x,y,z,w):
+	siny_cosp = 2 * (w * z + x * y)
+	cosy_cosp = 1 - 2 * (y * y + z * z)
+	return math.atan2(siny_cosp, cosy_cosp)
 
 def main(args=None):
 	rclpy.init(args=args)

@@ -16,7 +16,7 @@
   <exec_depend>nav2_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>action_msgs</exec_depend>
-  <exec_depend>KalmanFilter</exec_depend>
+  <exec_depend>scipy</exec_depend>
   
 
   <export>

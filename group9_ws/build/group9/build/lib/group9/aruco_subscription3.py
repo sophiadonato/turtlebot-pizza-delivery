@@ -91,14 +91,7 @@ class ArucoSubscriber(Node):
 			id = arucoMarkers.marker_ids[i]
 			self.get_logger().info(f'Aruco information : ID : {id}')
 			pose = arucoMarkers.poses[i]
-			poseVisit = Pose()
-			poseVisit.position.x = pose.position.x
-			poseVisit.position.y = pose.position.y
-			poseVisit.position.z = pose.position.z - 0.5
-			poseVisit.orientation.x = pose.orientation.x
-			poseVisit.orientation.y = pose.orientation.y
-			poseVisit.orientation.z = pose.orientation.z
-			poseVisit.orientation.w = pose.orientation.w
+			poseVisit = self.PoseToVisitForGivenAruco(pose)
 			try:
 				t = self.tf_buffer.lookup_transform('map','camera_optical_joint',rclpy.time.Time())
 			except TransformException as ex:
@@ -160,64 +153,24 @@ class ArucoSubscriber(Node):
 		t.transform.rotation.w = float(ArucoPose.orientation.w)
 		self.tf_static_broadcaster.sendTransform(t)
 
-	def PoseToVisitForGivenAruco(self,ArucoPose): #To be improved
-		#What is the orientation in the ArucoPose ?
-		#Values have been found using simulations on Gazebo
+	def PoseToVisitForGivenAruco(self,ArucoPose):
 		t1 = TransformStamped()
-  
-		t1.transform.translation.x = 0.0
-		t1.transform.translation.y = 0.0
-		t1.transform.translation.z = 0.5
-
-		# We want to get a vector that face the wall
-		# We have rotation of the axis of 180 degrees around z axis
-		# And rotation around y of -90 degrees
-		t1.transform.rotation.x = 0.0
-		t1.transform.rotation.y = 0.0
-		t1.transform.rotation.z = 0.0
-		t1.transform.rotation.w = 0.0 
+		t1.transform.translation.z = -0.5
+		ArucoPose = do_transform_pose(ArucoPose,t1)
   
 		# t2 = TransformStamped()
+		# # Rotation of 90° around y (green)
+		# t2.transform.rotation.y = -0.707
+		# t2.transform.rotation.w = 0.707 
+		# ArucoPose = do_transform_pose(ArucoPose,t2)
 
-		# t2.transform.translation.x = 0.0
-		# t2.transform.translation.y = 0.0
-		# t1.transform.translation.z = 0.0
+		# t3 = TransformStamped()
+		# # Rotation of 90° around x (red)
+		# t3.transform.rotation.x = -0.707
+		# t3.transform.rotation.w = 0.707 
+		# ArucoPose = do_transform_pose(ArucoPose,t3)
 
-		# # We want to get a vector that face the wall
-		# # And rotation around y of -90 degrees ? How come? TBC
-		# t1.transform.rotation.x = 0.0
-		# t1.transform.rotation.y = -0.707
-		# t1.transform.rotation.z = 0.0
-		# t1.transform.rotation.w = 0.707 
-		
-		#return do_transform_pose(do_transform_pose(ArucoPose, t1),t2)
-		return do_transform_pose(ArucoPose,t1)
-
-	# def PoseToVisitForGivenAruco(self,ArucoPose, ID):
-	# 	# Create the transform to move forward in Aruco's frame
-	# 	try:
-	# 		t = self.tf_buffer.lookup_transform('camera_optical_joint','map',rclpy.time.Time())
-	# 	except TransformException as ex:
-	# 		self.get_logger().info(f'Could not transform camera_optical_joint to map: {ex}')
-	# 		return
-	# 	pose = do_transform_pose(ArucoPose,t)
-	# 	pose.position.y += 0.5
-		
-	# 	try:
-	# 		t2 = self.tf_buffer.lookup_transform('map','camera_optical_joint',rclpy.time.Time())
-	# 	except TransformException as ex:
-	# 		self.get_logger().info(f'Could not transform map to camera_optical_joint: {ex}')
-	# 		return
-
-	# 	# Apply this transform relative to the Aruco pose
-	# 	return do_transform_pose(pose, t2)
-	
-	# def PoseToVisitForGivenAruco(self,ArucoPose, ID):
-	# 	# Create the transform to move forward in Aruco's frame
-	# 	ArucoPose.position.x += 0.5
-
-	# 	# Apply this transform relative to the Aruco pose
-	# 	return ArucoPose
+		return ArucoPose
 
 def main(args=None):
 	rclpy.init(args=args)
