@@ -1,0 +1,23 @@
+running egg_info
+writing ../../build/group9/group9.egg-info/PKG-INFO
+writing dependency_links to ../../build/group9/group9.egg-info/dependency_links.txt
+writing entry points to ../../build/group9/group9.egg-info/entry_points.txt
+writing requirements to ../../build/group9/group9.egg-info/requires.txt
+writing top-level names to ../../build/group9/group9.egg-info/top_level.txt
+reading manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+writing manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+running build
+running build_py
+running install
+running install_lib
+running install_data
+running install_egg_info
+removing '/home/laptop09/group9BIS/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/group9/group9.egg-info to /home/laptop09/group9BIS/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info
+running install_scripts
+Installing aruco_subscriber script to /home/laptop09/group9BIS/projet/group9_ws/install/group9/lib/group9
+Installing delivery script to /home/laptop09/group9BIS/projet/group9_ws/install/group9/lib/group9
+Installing fake script to /home/laptop09/group9BIS/projet/group9_ws/install/group9/lib/group9
+Installing map_explorer script to /home/laptop09/group9BIS/projet/group9_ws/install/group9/lib/group9
+Installing robot_pose script to /home/laptop09/group9BIS/projet/group9_ws/install/group9/lib/group9
+writing list of installed files to '/home/laptop09/group9BIS/projet/group9_ws/build/group9/install.log'
