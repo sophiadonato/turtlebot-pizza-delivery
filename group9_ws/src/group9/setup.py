@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
         	'map_explorer = group9.map_explorer:main',
-            'robot_pose = group9.robot_pose:main'
+            'robot_pose = group9.robot_pose:main',
+            'delivery = group9.delivery:main'
         ],
     },
 )
