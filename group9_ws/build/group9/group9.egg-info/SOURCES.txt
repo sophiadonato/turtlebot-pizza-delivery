@@ -8,10 +8,10 @@ setup.py
 ../../build/group9/group9.egg-info/requires.txt
 ../../build/group9/group9.egg-info/top_level.txt
 ../../build/group9/group9.egg-info/zip-safe
-group9/PathOfDelivering.py
 group9/__init__.py
+group9/delivery.py
+group9/delivery_v1.py
 group9/fake.py
-group9/path_of_delivery_sol1.py
 group9/robot_pose.py
 resource/group9
 test/test_copyright.py

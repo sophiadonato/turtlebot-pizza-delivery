@@ -1,6 +1,6 @@
 [console_scripts]
+delivery = group9.delivery:main
+delivery-v1 = group9.delivery_v1:main
 fake = group9.fake:main
-path = group9.PathOfDelivering:main
-path_sol = group9.path_of_delivery_sol1:main
 robot_pose = group9.robot_pose:main
 

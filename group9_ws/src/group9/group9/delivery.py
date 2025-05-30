@@ -50,6 +50,9 @@ class PathOfDelivery(Node):
         # Action client node to compute path to pose
         self.compute_path_node = ComputePathBetweenLocations()
 
+        # Action client to deliver
+        self.delivery_node = Delivery()
+
     # Sets arucos pose
     def arucos_location_callback(self, msg):
         self.arucos_pose = msg.poses
@@ -81,7 +84,7 @@ class PathOfDelivery(Node):
                 distance_matrix[i][j] = self.compute_estimated_distance(poses[i], poses[j])
                 distance_matrix[j][i] = distance_matrix[i][j]
 
-        distance_matrix[:,0] = 0 #why???
+        distance_matrix[:,0] = 0 
         self.get_logger().info(f'Computing delivery order using TSP')
         permutation,_ = solve_tsp_dynamic_programming(distance_matrix)
         self.get_logger().info(f'Permutation : {permutation}')
@@ -92,7 +95,7 @@ class PathOfDelivery(Node):
             sequence.poses.append(self.arucos_to_visit[nb -1])
 
         self.publisher.publish(sequence)
-        self.get_logger().info(f'plushied seq of poses : {sequence}')
+        rclpy.spin(self.delivery_node)
 
     
     # Computes the estimated distance between 2 poses, 
@@ -201,7 +204,7 @@ class Delivery(Node):
         self.poses_to_visit = msg.poses  #Pose[]
         self.nb_clients = len(self.poses_to_visit)
         self.received_poses = True
-        self.destroy_subsription(self.subcription_arucos_to_visit)
+        self.destroy_subscription(self.subcription_arucos_to_visit)
     
     def pizza_delivery_callback(self):
         if not self.received_poses:
@@ -220,9 +223,9 @@ class Delivery(Node):
         self.get_logger().info('Waiting for action server..')
         self._action_client.wait_for_server()
         goal_msg = NavigateToPose.Goal()
-        goal_msg = PoseStamped()
+        goal_msg.pose = PoseStamped()
         goal_msg.pose.header.frame_id = "map"
-        goal_msg.header.stamp = self.get_clock().now().to_msg()
+        goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
         goal_msg.pose.pose = pose 
         goal_msg.behavior_tree = ""
 
@@ -253,9 +256,7 @@ class Delivery(Node):
 def main(args=None):
     rclpy.init(args=args)
     path_computer_node = PathOfDelivery()
-    delivery_node = Delivery()
     rclpy.spin(path_computer_node)
-    rclpy.spin(delivery_node)
 	
 if __name__ == '__main__':
 	main()
