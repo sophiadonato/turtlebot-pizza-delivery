@@ -1,0 +1,32 @@
+[0.853s] Invoking command in '/home/laptop09/group9/projet/group9_ws/src/group9': PYTHONPATH=/home/laptop09/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/laptop09/group9/projet/group9_ws/build/group9/build install --record /home/laptop09/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data
+[1.263s] running egg_info
+[1.264s] writing ../../build/group9/group9.egg-info/PKG-INFO
+[1.264s] writing dependency_links to ../../build/group9/group9.egg-info/dependency_links.txt
+[1.265s] writing entry points to ../../build/group9/group9.egg-info/entry_points.txt
+[1.265s] writing requirements to ../../build/group9/group9.egg-info/requires.txt
+[1.265s] writing top-level names to ../../build/group9/group9.egg-info/top_level.txt
+[1.270s] reading manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[1.272s] writing manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[1.273s] running build
+[1.273s] running build_py
+[1.273s] copying group9/action.py -> /home/laptop09/group9/projet/group9_ws/build/group9/build/lib/group9
+[1.273s] copying group9/map_explorer.py -> /home/laptop09/group9/projet/group9_ws/build/group9/build/lib/group9
+[1.274s] running install
+[1.275s] running install_lib
+[1.277s] copying /home/laptop09/group9/projet/group9_ws/build/group9/build/lib/group9/action.py -> /home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9
+[1.277s] copying /home/laptop09/group9/projet/group9_ws/build/group9/build/lib/group9/map_explorer.py -> /home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9
+[1.279s] byte-compiling /home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/action.py to action.cpython-310.pyc
+[1.280s] byte-compiling /home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/map_explorer.py to map_explorer.cpython-310.pyc
+[1.284s] running install_data
+[1.285s] running install_egg_info
+[1.288s] removing '/home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info' (and everything under it)
+[1.289s] Copying ../../build/group9/group9.egg-info to /home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info
+[1.290s] running install_scripts
+[1.324s] Installing action script to /home/laptop09/group9/projet/group9_ws/install/group9/lib/group9
+[1.324s] Installing aruco_subscriber script to /home/laptop09/group9/projet/group9_ws/install/group9/lib/group9
+[1.324s] Installing delivery script to /home/laptop09/group9/projet/group9_ws/install/group9/lib/group9
+[1.324s] Installing fake script to /home/laptop09/group9/projet/group9_ws/install/group9/lib/group9
+[1.325s] Installing map_explorer script to /home/laptop09/group9/projet/group9_ws/install/group9/lib/group9
+[1.325s] Installing robot_pose script to /home/laptop09/group9/projet/group9_ws/install/group9/lib/group9
+[1.326s] writing list of installed files to '/home/laptop09/group9/projet/group9_ws/build/group9/install.log'
+[1.360s] Invoked command in '/home/laptop09/group9/projet/group9_ws/src/group9' returned '0': PYTHONPATH=/home/laptop09/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/laptop09/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/laptop09/group9/projet/group9_ws/build/group9/build install --record /home/laptop09/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data

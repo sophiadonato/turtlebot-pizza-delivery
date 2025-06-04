@@ -2,6 +2,7 @@
 import numpy as np
 import math
 import rclpy
+import time
 from rclpy.node import Node
 from geometry_msgs.msg import PoseArray,PoseStamped
 from std_msgs.msg import Int32MultiArray
@@ -44,7 +45,7 @@ class PathOfDelivery(Node):
 
         # Publisher of ordered Arucos location
         self.publisher = self.create_publisher(PoseArray, '/ordered_aruco_poses', 10)
-        self.arucos_pose = []
+        self.arucos_pose = [None]*10
         self.arucos_to_visit = []
 
         # Action client node to compute path to pose
@@ -246,7 +247,8 @@ class Delivery(Node):
         result = future.result().result
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().info('Goal succedeed !')
+            self.get_logger().info('Goal succedeed, now delivering pizza !')
+            time.sleep(3)
             self.client_idx +=1
         else:
             self.get_logger().info('Goal failed')

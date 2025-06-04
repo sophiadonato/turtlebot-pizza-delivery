@@ -79,7 +79,7 @@ class ArucoSubscriber(Node):
 		self.listener = TransformListener(self.tf_buffer, self)
 		nbArucos = 10
 		self.publisherNumber = self.create_publisher(Int32, '/arucos_number', 10)
-		self.publisher = self.create_publisher(PoseArray, '/robot_pose', 10)
+		self.publisher = self.create_publisher(PoseArray, '/arucos_location', 10)
 		self.ArucoLocations = [None]*nbArucos
 		self.LocationVisit = [None]*nbArucos
 		self.nbVisits = np.zeros(nbArucos)
@@ -116,7 +116,7 @@ class ArucoSubscriber(Node):
 			self.LocationVisit[id] = self.robotLocation(self.ArucoLocations[id])
 			self.make_transforms('Aruco',id,self.ArucoLocations[id])
 			self.make_transforms('Location',id,self.LocationVisit[id])
-			self.aruco_locations_publisher()
+			
 		msg = Int32()
 		msg.data = sum(1 for item in self.LocationVisit if item is not None)
 		self.get_logger().info(f'Number of arucos already found {msg.data}')
@@ -125,8 +125,6 @@ class ArucoSubscriber(Node):
 		if all(value > 5 for value in self.nbVisits):
 			self.get_logger().info('All arucos have been visited')
 			self.aruco_locations_publisher()
-			self.destroy_node()
-			rclpy.shutdown()
 
 	def aruco_locations_publisher(self):
 		robotToVisit = PoseArray()

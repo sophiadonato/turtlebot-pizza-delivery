@@ -44,7 +44,7 @@ class PathOfDelivery(Node):
 
         # Publisher of ordered Arucos location
         self.publisher = self.create_publisher(PoseArray, '/ordered_aruco_poses', 10)
-        self.arucos_pose = []
+        self.arucos_pose = [None]*10
         self.arucos_to_visit = []
 
         # Action client node to compute path to pose
@@ -68,7 +68,9 @@ class PathOfDelivery(Node):
         if all(pose is not None for pose in self.arucos_pose) and self.robot_pose != None:
             ids = msg.data
             self.nb_aruco_to_visit = len(ids)
+            self.get_logger().info(f'len arucos pose {len(self.arucos_pose)}')
             for i in ids:
+                self.get_logger().info(f'len arucos pose {i}')
                 self.arucos_to_visit = np.append(self.arucos_to_visit,np.array([self.arucos_pose[i]]))
             self.destroy_subscription(self.subcription_IDs)
             self.computation()
