@@ -17,7 +17,7 @@ class Fake(Node):
 		self.publisher2
 		self.timer = self.create_timer(2, self.timer_callback)
 		self.count = 7
-		self.pos_array = [[0.12, 2.04], [-1.6, -0.18], [-1.25, 2.67], [-3.34, 2.48], ]
+		self.pos_array = [[-0.0344, 0.00165], [0.867, -0.59], [-1.49, 0.278]]
 		
 		
 		
@@ -27,7 +27,6 @@ class Fake(Node):
 		msg = Int32()
 		msg.data = self.count
 		self.publisher1.publish(msg)
-		self.count +=1
 		
 		msg = Float32MultiArray()
 		msg.data = [coord for pose in self.pos_array for coord in pose]

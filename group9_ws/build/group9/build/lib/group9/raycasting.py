@@ -62,6 +62,7 @@ class Raycaster(Node):
         # Robot position
         self.x_robot = 0 
         self.y_robot = 0
+        self.z_robot = 0
 
         self.raycast_matrix = np.zeros((2000, 2000), dtype = float)
         self.p = np.zeros(3)
@@ -80,6 +81,7 @@ class Raycaster(Node):
     def robot_pose_callback(self, msg):
         self.x_robot = msg.pose.position.x
         self.y_robot = msg.pose.position.y
+        self.z_robot = msg.pose.position.z
         return 
     
     # Load information about aruco (again see with arnaud)
@@ -111,7 +113,7 @@ class Raycaster(Node):
             plt.savefig("src/group9/raycasting_map.pdf", dpi=300, bbox_inches='tight')
             plt.close()
 
-        self.goals = self.find_goals(self.raycast_matrix)
+        self.goals = self.find_goals(self.raycast_matrix) #PB IF NO GOAL AND NOT ALL ARUCOS
         self.nb_goals = len(self.goals)
         self.goal_idx = 0
 
@@ -131,7 +133,7 @@ class Raycaster(Node):
             self.sent_goal = True
             self.get_logger().info('Sending goal to the robot')
             self.rotate_360()
-            self.pos_array.append([self.x_robot, self.y_robot]) 
+            self.pos_array = np.append(self.pos_array, (self.x_robot, self.y_robot)) # MAYBE DING IT AFTER GOAL IS REACHED ???
             self.send_goal(self.goals[self.goal_idx])
 
         if self.goal_idx >= self.nb_goals :
@@ -187,7 +189,7 @@ class Raycaster(Node):
         true_length = np.sqrt(true_xlen**2 + true_ylen ** 2)
         
         #perimiter of 2 meters, can be modified
-        while true_length < 1:
+        while true_length < 1.5:
             if i < 0 or j < 0 or i >= i_max - 1 or j >= j_max- 1:
                 return False, None, None
             
@@ -334,7 +336,7 @@ class Raycaster(Node):
         # Frontier could be too small because of 2 reasons : "bad" prepocessing, or too close of a wall
         frontiers_copy = frontiers.copy()
         for frontier in frontiers_copy:
-            if len(frontier) < 2:
+            if len(frontier) < 10:
                 frontiers.remove(frontier)
         
 
@@ -385,6 +387,7 @@ class Raycaster(Node):
         goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
         goal_msg.pose.pose.position.x = goal[0]#In meters !
         goal_msg.pose.pose.position.y = goal[1]
+        goal_msg.pose.pose.position.z = self.z_robot
         goal_msg.pose.pose.orientation.w = 1.0
         goal_msg.behavior_tree =""
 
@@ -410,6 +413,7 @@ class Raycaster(Node):
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED :
             self.get_logger().info('Goal succeeded !')
+
             self.goal_idx +=1
             
         else :

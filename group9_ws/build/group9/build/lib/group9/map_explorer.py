@@ -18,7 +18,6 @@ class MapExplorer(Node):
 
 	def __init__(self):
 		super().__init__('map_explorer')
-		self.printOcc = True
 
 		# Subscription to Occupancy map
 		self.map_processing = self.create_subscription(
@@ -44,6 +43,7 @@ class MapExplorer(Node):
 		# Robot position
 		self.x_robot = 0 
 		self.y_robot = 0
+		self.z_robot = 0
 
 		# Grid info
 		self.p = np.zeros(3)
@@ -79,12 +79,14 @@ class MapExplorer(Node):
 			self.get_logger().info('Sending goal to the robot')
 
 			# Finding goal 
-			go_to_goal , x_goal, y_goal = self.find_next_goal(self.grid_matrix)
+			finished_map , x_goal, y_goal = self.find_next_goal(self.grid_matrix)
 
-			if go_to_goal :
+			self.rotate_360()
+			self.visited_poses.append([self.x_robot, self.y_robot])
+			self.get_logger().info(f"robot position : {self.x_robot}, {self.y_robot}")
+
+			if not finished_map :
 				self.get_logger().info(f" x goal : {x_goal}, y goal : {y_goal}")
-				self.rotate_360() 
-				self.visited_poses.append([self.x_robot, self.y_robot])
 				self.send_goal(x_goal, y_goal)
 		return
 	
@@ -92,6 +94,7 @@ class MapExplorer(Node):
 	def robot_pose_callback(self, msg):
 		self.x_robot = msg.pose.position.x
 		self.y_robot = msg.pose.position.y
+		self.z_robot = msg.pose.position.z
 		return 
 			
 
@@ -164,10 +167,6 @@ class MapExplorer(Node):
 		self.occ_res = grid.info.resolution
 		data = grid.data
 		data = np.reshape(data, (self.height, self.width))
-
-		data2 = np.copy(data)
-
-
 		wall_mask  = (data > 60)
 		no_mask = (data < 30) & (data > 0)
 		unknown = (data >= 30) & (data <= 60)
@@ -203,16 +202,6 @@ class MapExplorer(Node):
 							completed_mask[i,j] = True                  
 
 		data[completed_mask] = 1
-		if self.printOcc == True:
-			plt.imshow(data2,cmap="viridis")
-			plt.colorbar()
-			plt.savefig("src/group9/grid_before.pdf", dpi=300, bbox_inches='tight')
-			plt.close()
-			plt.imshow(data,cmap="viridis")
-			plt.colorbar()
-			plt.savefig("src/group9/grid_after.pdf", dpi=300, bbox_inches='tight')
-			plt.close()
-			self.printOcc = False
 		return data
 	
 
@@ -229,6 +218,7 @@ class MapExplorer(Node):
 		goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
 		goal_msg.pose.pose.position.x = x #In meters !
 		goal_msg.pose.pose.position.y = y
+		goal_msg.pose.pose.position.z = self.z_robot
 		goal_msg.pose.pose.orientation.w = 1.0
 		goal_msg.behavior_tree =""
 
@@ -319,7 +309,7 @@ class MapExplorer(Node):
 			msg = Float32MultiArray()
 			msg.data = [coord for pose in self.visited_poses for coord in pose]
 			self.publisher_pose.publish(msg)
-			return False, 0, 0
+			return True, 0, 0
 
 		# Finding middle of frontiers
 		frontier_middles = []
@@ -347,7 +337,7 @@ class MapExplorer(Node):
 				x_goal = x
 				y_goal = y
 
-		return True, x_goal, y_goal
+		return False, x_goal, y_goal
 	
 	#360 rotation to see Arucos
 	def rotate_360(self):
