@@ -17,8 +17,8 @@ class RobotPosition(Node):
 	def publish_pose(self):
 		try:
 			transform = self.tf_buffer.lookup_transform(
-				'base_footprint',
 				'map',
+				'base_footprint',
 				rclpy.time.Time())
 			pose = PoseStamped()
 			pose.header = transform.header

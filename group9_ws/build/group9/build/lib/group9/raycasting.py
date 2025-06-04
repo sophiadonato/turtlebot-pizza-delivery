@@ -106,6 +106,8 @@ class Raycaster(Node):
             self.get_logger().info('All arucos found ! ')
             return 
         
+        self.get_logger().info(f"{self.pos_array}")
+        
         for i in range(self.pos_array.shape[0]):
             self.raycast_360(self.pos_array[i])
             plt.imshow(self.raycast_matrix, cmap="viridis")
@@ -117,7 +119,7 @@ class Raycaster(Node):
         self.nb_goals = len(self.goals)
         self.goal_idx = 0
 
-        self.pos_array = []
+        self.pos_array = np.empty((0,2))
         self.raycast_done = True
         self.start = False
 
@@ -133,7 +135,7 @@ class Raycaster(Node):
             self.sent_goal = True
             self.get_logger().info('Sending goal to the robot')
             self.rotate_360()
-            self.pos_array = np.append(self.pos_array, (self.x_robot, self.y_robot)) # MAYBE DING IT AFTER GOAL IS REACHED ???
+            self.pos_array = np.append(self.pos_array, [[self.x_robot, self.y_robot]], axis=0)# MAYBE DING IT AFTER GOAL IS REACHED ???
             self.send_goal(self.goals[self.goal_idx])
 
         if self.goal_idx >= self.nb_goals :
