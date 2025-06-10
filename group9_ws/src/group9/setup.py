@@ -23,7 +23,8 @@ setup(
         	'map_explorer = group9.map_explorer:main',
             'raycaster = group9.end_exploration:main',
             'robot_pose = group9.robot_pose:main',
-            'fake = group9.fake:main'
+            'fake = group9.fake:main',
+            'aruco_subscriber = group9.Aruco_subscriber:main'
         ],
     },
 )

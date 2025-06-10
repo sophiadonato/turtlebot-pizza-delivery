@@ -62,7 +62,7 @@ class Raycaster(Node):
         # Robot position
         self.x_robot = 0 
         self.y_robot = 0
-        self.z_robot = 0
+        self.z_robot = 0.0
 
         self.raycast_matrix = np.zeros((2000, 2000), dtype = float)
         self.p = np.zeros(3)
@@ -75,6 +75,10 @@ class Raycaster(Node):
     #To load the grid one time
     def map_processing_callback(self, grid):
         self.raycast_matrix = self.load_grid(grid)
+        plt.imshow(self.raycast_matrix, cmap="viridis")
+        plt.colorbar()
+        plt.savefig("src/group9/first_loaded_map.pdf", dpi=300, bbox_inches='tight')
+        plt.close()
         self.destroy_subscription(self.map_processing_subscription)
     
     # Update robot position
@@ -131,9 +135,9 @@ class Raycaster(Node):
         
         if self.sent_goal == False: #and self.goal_idx < self.nb_goals:
             self.sent_goal = True
-            self.get_logger().info('Sending goal to the robot')
-            self.rotate_360()
             self.raycast_360([self.x_robot, self.y_robot])
+            self.get_logger().info('Sending goal to the robot')
+            #self.rotate_360()
             plt.imshow(self.raycast_matrix, cmap="viridis")
             plt.colorbar()
             plt.savefig("src/group9/raycasting_map.pdf", dpi=300, bbox_inches='tight')
@@ -236,6 +240,7 @@ class Raycaster(Node):
                 continue
             angle = n * 2 * np.pi / n_rays
             self.one_ray_cast(r_pos_map, angle)
+        return
     
     def load_grid(self, grid):
         self.width = grid.info.width

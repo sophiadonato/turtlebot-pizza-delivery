@@ -15,9 +15,10 @@ class Fake(Node):
 			10
 		)
 		self.publisher2
+		self.sent = False
 		self.timer = self.create_timer(2, self.timer_callback)
 		self.count = 7
-		self.pos_array = [[0.0, 0.0], [1.24, -0.244], [2.41, 0.544], [1.76, 1.28], [1.76, 2.42], [1.58, -0.147], [-1.08, 0.689], [-1.87, 2.41]]  
+		self.pos_array = [[0.0, 0.0], [1.2, -0.05], [1.64, 1.57], [1.43, 1.5]]  
 		
 		
 		
@@ -28,9 +29,11 @@ class Fake(Node):
 		msg.data = self.count
 		self.publisher1.publish(msg)
 		
-		msg = Float32MultiArray()
-		msg.data = [coord for pose in self.pos_array for coord in pose]
-		self.publisher2.publish(msg)
+		if not self.sent:
+			msg = Float32MultiArray()
+			msg.data = [coord for pose in self.pos_array for coord in pose]
+			self.publisher2.publish(msg)
+			self.sent = True
 	
 		
 def main(args=None):
