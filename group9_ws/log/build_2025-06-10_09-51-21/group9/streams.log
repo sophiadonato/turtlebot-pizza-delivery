@@ -1,0 +1,30 @@
+[0.993s] Invoking command in '/home/laptop03/group9/projet/group9_ws/src/group9': PYTHONPATH=/home/laptop03/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/laptop03/group9/projet/group9_ws/build/group9/build install --record /home/laptop03/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data
+[1.317s] running egg_info
+[1.318s] writing ../../build/group9/group9.egg-info/PKG-INFO
+[1.318s] writing dependency_links to ../../build/group9/group9.egg-info/dependency_links.txt
+[1.318s] writing entry points to ../../build/group9/group9.egg-info/entry_points.txt
+[1.318s] writing requirements to ../../build/group9/group9.egg-info/requires.txt
+[1.319s] writing top-level names to ../../build/group9/group9.egg-info/top_level.txt
+[1.321s] reading manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[1.322s] writing manifest file '../../build/group9/group9.egg-info/SOURCES.txt'
+[1.322s] running build
+[1.323s] running build_py
+[1.323s] copying group9/end_exploration.py -> /home/laptop03/group9/projet/group9_ws/build/group9/build/lib/group9
+[1.323s] copying group9/map_explorer.py -> /home/laptop03/group9/projet/group9_ws/build/group9/build/lib/group9
+[1.324s] running install
+[1.324s] running install_lib
+[1.325s] copying /home/laptop03/group9/projet/group9_ws/build/group9/build/lib/group9/end_exploration.py -> /home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9
+[1.326s] copying /home/laptop03/group9/projet/group9_ws/build/group9/build/lib/group9/map_explorer.py -> /home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9
+[1.327s] byte-compiling /home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/end_exploration.py to end_exploration.cpython-310.pyc
+[1.332s] byte-compiling /home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/map_explorer.py to map_explorer.cpython-310.pyc
+[1.335s] running install_data
+[1.335s] running install_egg_info
+[1.337s] removing '/home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info' (and everything under it)
+[1.338s] Copying ../../build/group9/group9.egg-info to /home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9-0.0.0-py3.10.egg-info
+[1.339s] running install_scripts
+[1.367s] Installing fake script to /home/laptop03/group9/projet/group9_ws/install/group9/lib/group9
+[1.367s] Installing map_explorer script to /home/laptop03/group9/projet/group9_ws/install/group9/lib/group9
+[1.368s] Installing raycaster script to /home/laptop03/group9/projet/group9_ws/install/group9/lib/group9
+[1.368s] Installing robot_pose script to /home/laptop03/group9/projet/group9_ws/install/group9/lib/group9
+[1.368s] writing list of installed files to '/home/laptop03/group9/projet/group9_ws/build/group9/install.log'
+[1.402s] Invoked command in '/home/laptop03/group9/projet/group9_ws/src/group9' returned '0': PYTHONPATH=/home/laptop03/group9/projet/group9_ws/build/group9/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/group9 build --build-base /home/laptop03/group9/projet/group9_ws/build/group9/build install --record /home/laptop03/group9/projet/group9_ws/build/group9/install.log --single-version-externally-managed install_data

@@ -17,7 +17,7 @@ class Fake(Node):
 		self.publisher2
 		self.timer = self.create_timer(2, self.timer_callback)
 		self.count = 7
-		self.pos_array = [[0.0, 0.0], [1.9, 0.947], [0.82, -2.09], [3.6, 0.037]]  
+		self.pos_array = [[0.0, 0.0], [1.24, -0.244], [2.41, 0.544], [1.76, 1.28], [1.76, 2.42], [1.58, -0.147], [-1.08, 0.689], [-1.87, 2.41]]  
 		
 		
 		

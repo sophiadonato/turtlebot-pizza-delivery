@@ -43,7 +43,7 @@ class MapExplorer(Node):
 		# Robot position
 		self.x_robot = 0 
 		self.y_robot = 0
-		self.z_robot = 0
+		self.z_robot = 0.0
 
 		# Grid info
 		self.p = np.zeros(3)
