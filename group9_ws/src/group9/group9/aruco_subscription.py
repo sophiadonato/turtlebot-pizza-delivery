@@ -115,7 +115,7 @@ class ArucoSubscriber(Node):
 			self.nbVisits[id] += 1
 			self.LocationVisit[id] = self.robotLocation(self.ArucoLocations[id])
 			self.make_transforms('Aruco',id,self.ArucoLocations[id])
-			self.make_transforms('Location',id,self.LocationVisit[id])
+			#self.make_transforms('Location',id,self.LocationVisit[id])
 			
 		msg = Int32()
 		msg.data = sum(1 for item in self.LocationVisit if item is not None)

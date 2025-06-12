@@ -6,7 +6,7 @@ import time
 from rclpy.node import Node
 from geometry_msgs.msg import PoseArray,PoseStamped
 from std_msgs.msg import Int32MultiArray
-from python_tsp.exact import solve_tsp_dynamic_programming #pip install python-tsp
+from python_tsp.exact.branch_and_bound import solve_tsp_branch_and_bound
 from action_msgs.msg import GoalStatus
 from nav2_msgs.action import ComputePathToPose, NavigateToPose
 from rclpy.action import ActionClient
@@ -87,7 +87,7 @@ class PathOfDelivery(Node):
 
         distance_matrix[:,0] = 0 
         self.get_logger().info(f'Computing delivery order using TSP')
-        permutation,_ = solve_tsp_dynamic_programming(distance_matrix)
+        permutation,_ = solve_tsp_branch_and_bound(distance_matrix)
         self.get_logger().info(f'Permutation : {permutation}')
         permutation = permutation[1:] #The first element is always the current location of the Robot
         sequence = PoseArray()

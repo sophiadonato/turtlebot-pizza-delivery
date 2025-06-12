@@ -2,10 +2,11 @@
 import numpy as np
 import math
 import rclpy
+import time
 from rclpy.node import Node
 from geometry_msgs.msg import PoseArray,PoseStamped
 from std_msgs.msg import Int32MultiArray
-from python_tsp.exact import solve_tsp_dynamic_programming #pip install python-tsp
+from python_tsp.exact.branch_and_bound import solve_tsp_branch_and_bound
 from action_msgs.msg import GoalStatus
 from nav2_msgs.action import ComputePathToPose, NavigateToPose
 from rclpy.action import ActionClient
@@ -68,9 +69,7 @@ class PathOfDelivery(Node):
         if all(pose is not None for pose in self.arucos_pose) and self.robot_pose != None:
             ids = msg.data
             self.nb_aruco_to_visit = len(ids)
-            self.get_logger().info(f'len arucos pose {len(self.arucos_pose)}')
             for i in ids:
-                self.get_logger().info(f'len arucos pose {i}')
                 self.arucos_to_visit = np.append(self.arucos_to_visit,np.array([self.arucos_pose[i]]))
             self.destroy_subscription(self.subcription_IDs)
             self.computation()
@@ -88,7 +87,7 @@ class PathOfDelivery(Node):
 
         distance_matrix[:,0] = 0 
         self.get_logger().info(f'Computing delivery order using TSP')
-        permutation,_ = solve_tsp_dynamic_programming(distance_matrix)
+        permutation,_ = solve_tsp_branch_and_bound(distance_matrix)
         self.get_logger().info(f'Permutation : {permutation}')
         permutation = permutation[1:] #The first element is always the current location of the Robot
         sequence = PoseArray()
@@ -248,7 +247,8 @@ class Delivery(Node):
         result = future.result().result
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().info('Goal succedeed !')
+            self.get_logger().info('Goal succedeed, now delivering pizza !')
+            time.sleep(3)
             self.client_idx +=1
         else:
             self.get_logger().info('Goal failed')
