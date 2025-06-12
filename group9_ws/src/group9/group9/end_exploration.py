@@ -126,6 +126,7 @@ class Raycaster(Node):
 
         #self.pos_array = np.empty((0,2))
         self.raycast_done = True
+        self.sart = False
 
     def map_discovery_callback(self):
         if not self.raycast_done:
@@ -138,7 +139,6 @@ class Raycaster(Node):
         if self.sent_goal == False: #and self.goal_idx < self.nb_goals:
             self.sent_goal = True
             self.rotate_360()
-            self.pos_array = np.append(self.pos_array, [[self.x_robot, self.y_robot]], axis=0)
             self.get_logger().info('Sending goal to the robot')
             if self.nb_goals > 0:
                 min_dist = np.inf
@@ -149,6 +149,7 @@ class Raycaster(Node):
                         y_goal = y
                 self.send_goal([x_goal, y_goal])
                 self.raycast_done = False
+                self.start = True
             else: 
                 self.get_logger().info('Raycast complete but not all arucos found')
                 return
@@ -430,7 +431,7 @@ class Raycaster(Node):
             
         else :
             self.get_logger().info('Goal failed.')
-        
+        self.pos_array = np.append(self.pos_array, [[self.x_robot, self.y_robot]], axis=0)
         self.sent_goal = False
 
     #360 rotation to see Arucos
