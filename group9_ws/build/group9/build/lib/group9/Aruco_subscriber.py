@@ -99,6 +99,10 @@ class ArucoSubscriber(Node):
 				break
 			
 			pose = arucoMarkers.poses[i]
+			if (np.sqrt(pose.position.x**2 + pose.position.z**2) > 2.5) :
+				self.get_logger().info(f'This aruco is too far')
+				return 
+			
 			try:
 				t = self.tf_buffer.lookup_transform('map','camera_optical_joint',rclpy.time.Time())
 			except TransformException as ex:
@@ -118,7 +122,7 @@ class ArucoSubscriber(Node):
 			self.make_transforms('Location',id,self.LocationVisit[id])
 			
 		msg = Int32()
-		msg.data = sum(1 for item in self.LocationVisit if item is not None)
+		msg.data = sum(1 for item in self.nbVisits if item > 5)
 		self.get_logger().info(f'Number of arucos already found {msg.data}')
 		self.publisherNumber.publish(msg)
 		
@@ -133,6 +137,7 @@ class ArucoSubscriber(Node):
 			if pose is not None:
 				robotToVisit.poses.append(pose)
 		self.publisher.publish(robotToVisit)
+		self.destroy_subscription(self.publisher)
 	
 	def make_transforms(self,Name, ID, ArucoPose):
 		t = TransformStamped()

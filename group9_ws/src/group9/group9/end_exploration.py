@@ -33,7 +33,7 @@ class Raycaster(Node):
         self.start = False #True when receiving the positions from mapExplorer node
 
         # Subscription to the number of aruco, see with arnaud (maybe list of arucos already found and calculate de length)
-        self.nbr_arucos_subscriber = self.create_subscription(Int32,'/aruco_number', self.load_nbr_aruco_callback, 10)
+        self.nbr_arucos_subscriber = self.create_subscription(Int32,'/arucos_number', self.load_nbr_aruco_callback, 10)
         self.nbr_arucos_subscriber
         self.nbr_aruco = 0
 	
@@ -80,7 +80,6 @@ class Raycaster(Node):
         plt.colorbar()
         plt.savefig("src/group9/first_loaded_map.pdf", dpi=300, bbox_inches='tight')
         plt.close()
-        self.destroy_subscription(self.map_processing_subscription)
     
     # Update robot position
     def robot_pose_callback(self, msg):
@@ -105,6 +104,7 @@ class Raycaster(Node):
         return
     
     def raycast_callback(self):
+
         if not self.start :
             return 
         if self.nbr_aruco >=10:
@@ -124,7 +124,6 @@ class Raycaster(Node):
         self.nb_goals = len(self.goals)
         self.goal_idx = 0
 
-        #self.pos_array = np.empty((0,2))
         self.raycast_done = True
         self.sart = False
 
@@ -134,7 +133,7 @@ class Raycaster(Node):
         
         if self.nbr_aruco >=10:
             self.get_logger().info('All arucos found ! ')
-            return 
+            return
         
         if self.sent_goal == False: #and self.goal_idx < self.nb_goals:
             self.sent_goal = True

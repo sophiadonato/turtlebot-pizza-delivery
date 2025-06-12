@@ -33,7 +33,7 @@ class Raycaster(Node):
         self.start = False #True when receiving the positions from mapExplorer node
 
         # Subscription to the number of aruco, see with arnaud (maybe list of arucos already found and calculate de length)
-        self.nbr_arucos_subscriber = self.create_subscription(Int32,'/aruco_number', self.load_nbr_aruco_callback, 10)
+        self.nbr_arucos_subscriber = self.create_subscription(Int32,'/arucos_number', self.load_nbr_aruco_callback, 10)
         self.nbr_arucos_subscriber
         self.nbr_aruco = 0
 	
@@ -65,6 +65,7 @@ class Raycaster(Node):
         self.z_robot = 0.0
 
         self.raycast_matrix = np.zeros((2000, 2000), dtype = float)
+        self.grid_no_raycast = np.zeros((2000, 2000), dtype = float)
         self.p = np.zeros(3)
         self.q = np.zeros(4)
         self.occ_res = 0 
@@ -74,12 +75,11 @@ class Raycaster(Node):
 
     #To load the grid one time
     def map_processing_callback(self, grid):
-        self.raycast_matrix = self.load_grid(grid)
-        plt.imshow(self.raycast_matrix, cmap="viridis")
+        self.grid_no_raycast = self.load_grid(grid)
+        plt.imshow(self.grid_no_raycast, cmap="viridis")
         plt.colorbar()
         plt.savefig("src/group9/first_loaded_map.pdf", dpi=300, bbox_inches='tight')
         plt.close()
-        self.destroy_subscription(self.map_processing_subscription)
     
     # Update robot position
     def robot_pose_callback(self, msg):
@@ -104,7 +104,7 @@ class Raycaster(Node):
         return
     
     def raycast_callback(self):
-        self.get_logger().info('raycast_callback')
+
         if not self.start :
             return 
         if self.nbr_aruco >=10:
@@ -112,39 +112,33 @@ class Raycaster(Node):
             return 
         
         self.get_logger().info(f"{self.pos_array}")
-        
+        self.raycast_matrix = np.copy(self.grid_no_raycast)
         for i in range(self.pos_array.shape[0]):
             self.raycast_360(self.pos_array[i])
+        plt.imshow(self.raycast_matrix, cmap="viridis")
+        plt.colorbar()
+        plt.savefig("src/group9/raycasting_map.pdf", dpi=300, bbox_inches='tight')
+        plt.close()
 
-        #self.goals = self.find_goals(self.raycast_matrix) #PB IF NO GOAL AND NOT ALL ARUCOS
+        self.goals = self.find_goals(self.raycast_matrix) #PB IF NO GOAL AND NOT ALL ARUCOS
         self.nb_goals = len(self.goals)
         self.goal_idx = 0
 
-        self.pos_array = np.empty((0,2))
         self.raycast_done = True
-        self.start = False
+        self.sart = False
 
     def map_discovery_callback(self):
-        self.get_logger().info('map_discovery_callback')
         if not self.raycast_done:
             return
         
         if self.nbr_aruco >=10:
             self.get_logger().info('All arucos found ! ')
-            return 
+            return
         
         if self.sent_goal == False: #and self.goal_idx < self.nb_goals:
             self.sent_goal = True
-            self.raycast_360([self.x_robot, self.y_robot])
+            self.rotate_360()
             self.get_logger().info('Sending goal to the robot')
-            #self.rotate_360()
-            plt.imshow(self.raycast_matrix, cmap="viridis")
-            plt.colorbar()
-            plt.savefig("src/group9/raycasting_map.pdf", dpi=300, bbox_inches='tight')
-            plt.close()
-            #self.pos_array = np.append(self.pos_array, [[self.x_robot, self.y_robot]], axis=0)# MAYBE DING IT AFTER GOAL IS REACHED ???
-            self.goals = self.find_goals(self.raycast_matrix)
-            self.nb_goals = len(self.goals)
             if self.nb_goals > 0:
                 min_dist = np.inf
                 for x, y in self.goals :
@@ -153,14 +147,11 @@ class Raycaster(Node):
                         x_goal = x
                         y_goal = y
                 self.send_goal([x_goal, y_goal])
+                self.raycast_done = False
+                self.start = True
             else: 
                 self.get_logger().info('Raycast complete but not all arucos found')
                 return
-        
-		# if self.goal_idx >= self.nb_goals :
-		#     self.raycast_done = False
-		#     self.start = True
-
 
     ##### Functions to process the grid 
 
@@ -439,7 +430,7 @@ class Raycaster(Node):
             
         else :
             self.get_logger().info('Goal failed.')
-        
+        self.pos_array = np.append(self.pos_array, [[self.x_robot, self.y_robot]], axis=0)
         self.sent_goal = False
 
     #360 rotation to see Arucos
