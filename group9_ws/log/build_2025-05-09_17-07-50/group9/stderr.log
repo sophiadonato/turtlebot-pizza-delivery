@@ -1,5 +1,0 @@
-  File "/home/laptop03/group9/projet/group9_ws/install/group9/lib/python3.10/site-packages/group9/map_subscriber.py", line 166
-    		while is_good = False :
-    		      ^^^^^^^^^^^^^^^
-SyntaxError: invalid syntax. Maybe you meant '==' or ':=' instead of '='?
-
