@@ -52,6 +52,7 @@ class Raycaster(Node):
         self.raycast = self.create_timer(3, self.raycast_callback)
         self.raycast_done = False
         self.goals = []
+        self.flag_first = True
 
         # Discovering the map every 3 sec
         self.map_discovery = self.create_timer(3, self.map_discovery_callback)
@@ -90,6 +91,7 @@ class Raycaster(Node):
     
     # Load information about aruco (again see with arnaud)
     def load_nbr_aruco_callback(self, msg):
+        self.get_logger().info(f"hello : {msg}")
         self.nbr_aruco = msg.data
     
     # Receiving first array from map explorer, putting it in good shape 
@@ -111,7 +113,6 @@ class Raycaster(Node):
             self.get_logger().info('All arucos found ! ')
             return 
         
-        self.get_logger().info(f"{self.pos_array}")
         self.raycast_matrix = np.copy(self.grid_no_raycast)
         for i in range(self.pos_array.shape[0]):
             self.raycast_360(self.pos_array[i])
@@ -137,7 +138,10 @@ class Raycaster(Node):
         
         if self.sent_goal == False: #and self.goal_idx < self.nb_goals:
             self.sent_goal = True
-            self.rotate_360()
+            if self.flag_first:
+                self.flag_first = False
+            else : 
+                self.rotate_360()
             self.get_logger().info('Sending goal to the robot')
             if self.nb_goals > 0:
                 min_dist = np.inf

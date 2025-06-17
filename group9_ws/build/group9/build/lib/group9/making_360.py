@@ -19,7 +19,7 @@ class Making360(Node):
         twist.linear.x = 0.0
         twist.angular.z = self.angular_speed
         
-        angle = 2* 3.1416 #360 degrees
+        angle = 2*4 #more or less 360 degrees
         duration = angle/self.angular_speed
         start_time = self.get_clock().now().seconds_nanoseconds()[0]
         self.get_logger().info("Starting rotation")

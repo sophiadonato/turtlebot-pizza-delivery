@@ -21,10 +21,10 @@ setup(
     entry_points={
         'console_scripts': [
         	'map_explorer = group9.map_explorer:main',
-            'raycaster = group9.end_exploration:main',
+            'raycaster = group9.raycasting:main',
             'robot_pose = group9.robot_pose:main',
-            'fake = group9.fake:main',
-            'aruco_subscriber = group9.Aruco_subscriber:main'
+            'delivery = group9.delivery:main',
+            'aruco_subscriber = group9.aruco_subscription:main'
         ],
     },
 )
