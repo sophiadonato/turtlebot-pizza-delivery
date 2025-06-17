@@ -52,6 +52,7 @@ class Raycaster(Node):
         self.raycast = self.create_timer(3, self.raycast_callback)
         self.raycast_done = False
         self.goals = []
+        self.flag_first = True
 
         # Discovering the map every 3 sec
         self.map_discovery = self.create_timer(3, self.map_discovery_callback)
@@ -137,7 +138,10 @@ class Raycaster(Node):
         
         if self.sent_goal == False: #and self.goal_idx < self.nb_goals:
             self.sent_goal = True
-            self.rotate_360()
+            if self.flag_first:
+                self.flag_first = False
+            else : 
+                self.rotate_360()
             self.get_logger().info('Sending goal to the robot')
             if self.nb_goals > 0:
                 min_dist = np.inf
