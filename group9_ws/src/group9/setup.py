@@ -23,10 +23,7 @@ setup(
         	'map_explorer = group9.map_explorer:main',
             'robot_pose = group9.robot_pose:main',
             'delivery = group9.delivery:main',
-            'fake = group9.fake:main',
-            'aruco_subscriber = group9.aruco_subscription:main',
-            'action = group9.action:main'
-
+            'aruco_subscriber = group9.aruco_subscription:main'
         ],
     },
 )
