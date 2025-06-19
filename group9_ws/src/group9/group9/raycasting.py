@@ -32,7 +32,7 @@ class Raycaster(Node):
         self.pos_array = []
         self.start = False #True when receiving the positions from mapExplorer node
 
-        # Subscription to the number of aruco, see with arnaud (maybe list of arucos already found and calculate de length)
+        # Subscription to the number of aruco
         self.nbr_arucos_subscriber = self.create_subscription(Int32,'/arucos_number', self.load_nbr_aruco_callback, 10)
         self.nbr_arucos_subscriber
         self.nbr_aruco = 0
