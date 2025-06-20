@@ -9,10 +9,6 @@ def generate_launch_description():
             name='aruco_subscriber'),
         launch_ros.actions.Node(
             package='group9',
-            executable='map_explorer',
-            name='map_explorer'),
-        launch_ros.actions.Node(
-            package='group9',
             executable='robot_pose',
             name='robot_pose'),
         launch_ros.actions.Node(
@@ -23,4 +19,8 @@ def generate_launch_description():
             package='group9',
             executable='raycaster',
             name='raycaster'),
+        launch_ros.actions.Node(
+            package='group9',
+            executable='map_explorer',
+            name='map_explorer'),
   ])
